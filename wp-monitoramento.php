@@ -69,8 +69,8 @@ $meta_boxes_obras = array();
 # O campo "nohistory" não é utilizado pelo 'RW_Meta_Box'. É somente para dizer que este campo não
 # vai ser guardado no revision do WP.
 $gd_obras_custom_fields = array(
-		array(	'name'		=> 'Descritivo Livre da Obra',
-				'id'		=> $gdobras_prefix . 'descritivo_livre',
+		array(	'name'		=> 'Descritivo de Status da Obra',
+				'id'		=> $gdobras_prefix . 'descritivo_status',
 				'desc'		=> '',
 				'type'		=> 'wysiwyg'	),
 		array(	'name'		=> '% Execução da Obra',
@@ -228,5 +228,50 @@ function gdobras_revision_field( $value, $field ) {
 add_filter( '_wp_post_revision_field_my_meta', 'gdobras_revision_field', 10, 2 );
 
 # Métodos utilizados para salvar as revisões dos dados nas revisões dos posts. /\ /\ /\
+
+# ===============================================================================
+
+// Register Custom Taxonomy
+function gdobra_tema_taxonomy()  {
+    $labels = array(
+        'name'                       => 'Temas',
+        'singular_name'              => 'Tema',
+        'menu_name'                  => 'Tema',
+        'all_items'                  => 'Todos os Temas',
+        'parent_item'                => 'Tema pai',
+        'parent_item_colon'          => 'Tema pai:',
+        'new_item_name'              => 'Novo Tema',
+        'add_new_item'               => 'Adicionar novo Tema',
+        'edit_item'                  => 'Editar Tema',
+        'update_item'                => 'Alterar Tema',
+        'separate_items_with_commas' => 'Temas separados por virgulas',
+        'search_items'               => 'Procurar temas',
+        'add_or_remove_items'        => 'Adicionar ou remover temas',
+        'choose_from_most_used'      => 'Escolha um dos temas mais utilizados',
+    );
+
+    $rewrite = array(
+        'slug'                       => 'obra/tema',
+        'with_front'                 => true,
+        'hierarchical'               => true,
+    );
+
+    $args = array(
+        'labels'                     => $labels,
+        'hierarchical'               => true,
+        'public'                     => true,
+        'show_ui'                    => true,
+        'show_admin_column'          => true,
+        'show_in_nav_menus'          => true,
+        'show_tagcloud'              => true,
+        'query_var'                  => 'tema',
+        'rewrite'                    => $rewrite,
+    );
+
+    register_taxonomy( 'tema', 'gdobra', $args );
+}
+
+// Hook into the 'init' action
+add_action( 'init', 'gdobra_tema_taxonomy', 0 );
 
 ?>
