@@ -25,6 +25,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+
+include("wp-monitoramento.post.php");
+include("wp-monitoramento.xmlrpc.php");
+
+
+
 function create_post_type_monitoramento() {
 	register_post_type( 'gdobra',
 		array(
