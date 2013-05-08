@@ -128,22 +128,24 @@ function monit_post_thumb($post, $params) {
     $thumbs = array();
 
     // No thumbnails requested, let's get out
-    if (!array_key_exists('thumbsizes', $params)) {
-        return $thumbs;
-    }
+    // if (!array_key_exists('thumbsizes', $params)) {
+    //     return $thumbs;
+    // }
 
     // ok, let's handle the thumbnail request, but only if there's
     // something to handle, of course.
     $pid = $post['ID'];
+
     if (has_post_thumbnail($pid)) {
-        foreach ($params['thumbsizes'] as $size) {
+        // foreach ($params['thumbsizes'] as $size) {
+            $size = 'thumb';
             $tid = get_post_thumbnail_id($pid);
-            $info = wp_get_attachment_image_src($tid, $size);
+            $info = wp_get_attachment_image_src($tid, array(160,100));
             $thumbs[$size] = array();
             $thumbs[$size]['url'] = $info[0];
             $thumbs[$size]['width'] = $info[1];
             $thumbs[$size]['height'] = $info[2];
-        }
+        // }
     }
     return $thumbs;
 }

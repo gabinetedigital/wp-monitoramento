@@ -37,6 +37,8 @@ function _monit_prepare_post($post, $params) {
     global $wp_xmlrpc_server;
     $pid = $post['ID'];
     $post_date = monit_post_date($post);
+    // error_log("POST::::::::::::::::::");
+    // error_log(print_r($post, True));
     return array(
         'id' => (string) $pid,
         'title' => $post['post_title'],
@@ -70,8 +72,11 @@ function monitoramento_getObra($args) {
 
     $post_type = "gdobra"; #$args[1];
 
-    if (isset($args[1]))
-        $the_slug = $args[1];
+    if (!isset($args[1]))
+        return null;
+
+    $the_slug = $args[1];
+    error_log($the_slug);
 
     $query=array(
       'name' => $the_slug,
