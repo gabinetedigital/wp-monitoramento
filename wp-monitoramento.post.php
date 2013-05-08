@@ -40,6 +40,22 @@ function monit_post_date($post) {
 
 
 /**
+ * Return the new taxonomy for this post
+ */
+function monit_post_tema($postid){
+
+    // error_log("====================================== zzzz ");
+    // $temas = get_terms( 'tema' );
+    // error_log( print_r($temas,True) );
+
+    $otema = get_the_terms($postid, 'tema');
+    // error_log( print_r($otema,True) );
+    // error_log("====================================== zzzz");
+
+    return $otema;
+}
+
+/**
  * Returns some attributes about the user who created a post
  *
  * @since 0.1.1

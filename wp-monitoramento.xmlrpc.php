@@ -44,6 +44,7 @@ function _monit_prepare_post($post, $params) {
         'title' => $post['post_title'],
         'slug' => $post['post_name'],
         'date' => $post_date,
+        'tema' => monit_post_tema($pid),
         'link' => post_permalink($pid),
         'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
         'author' => monit_post_author($post),
@@ -145,19 +146,20 @@ function monitoramento_getObraTimeline($args) {
         return $args;
     if (!isset($args[1]))
         return null;
-    if (!isset($args[2]))
-        return null;
+
     error_log(' ======================================== ARGS ======================================== ');
     error_log(print_r($args, True));
-    $post_type = $args[1];
-    $the_parent = $args[2];
+
+    $post_type = "gdobra";
+    $the_parent = $args[1];
+
     $query=array(
       'post_parent' => $the_parent,
       'post_type' => $post_type,
-      'numberposts' => -1,
+      'numberposts' => 10,
       'post_status' => 'publish',
-      'orderby' => 'menu_order, post_date',
-      'order' => 'asc'
+      'orderby' => 'post_date',
+      'order' => 'desc'
     );
     $my_posts = get_posts($query);
     error_log( print_r( (array)$my_posts[0], True) );
