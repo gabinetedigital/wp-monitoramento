@@ -46,7 +46,7 @@ function _monit_prepare_post($post, $params) {
         'date' => $post_date,
         'tema' => monit_post_tema($pid),
         'link' => post_permalink($pid),
-        'format' => (($f = get_post_format($post)) === '' ? 'standard' : $f),
+        'format' => get_post_format($pid),
         'author' => monit_post_author($post),
         'categories' => monit_post_categories($post),
         'tags' => monit_post_tags($post),
@@ -115,7 +115,8 @@ function monitoramento_getObras($args) {
     $query=array(
       // 'name' => $the_slug,
       'post_type' => $post_type,
-      'post_status' => 'publish'
+      'post_status' => 'publish',
+      'post_parent'     => 0 # -> Somente os posts PAI
       //, 'numberposts' => 1
     );
     $my_posts = get_posts($query);
@@ -170,7 +171,7 @@ function monitoramento_getObraTimeline($args) {
     // Handling posts found
     $struct = array( );
     foreach ( (array)$my_posts as $post ) {
-        array_push($struct, _exapi_prepare_post( (array)$post, $params) );
+        array_push($struct, _monit_prepare_post( (array)$post, $args) );
     }
     return $struct;
 }
