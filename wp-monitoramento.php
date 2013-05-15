@@ -64,6 +64,39 @@ function create_post_type_monitoramento() {
 
 add_action( 'init', 'create_post_type_monitoramento' );
 
+# ---- adiciona filtro de paginas pai -----
+
+function fws_admin_posts_filter( $query ) {
+    global $pagenow;
+    if ( is_admin() && $pagenow == 'edit.php' && !empty($_GET['my_parent_pages'])) {
+        $query->query_vars['post_parent'] = $_GET['my_parent_pages'];
+    }
+}
+add_filter( 'parse_query', 'fws_admin_posts_filter' );
+
+function admin_page_filter_parentpages() {
+    global $wpdb;
+    if (isset($_GET['post_type']) && $_GET['post_type'] == 'gdobra') {
+		$sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'gdobra' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
+		// $sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'page' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
+		$parent_pages = $wpdb->get_results($sql, OBJECT_K);
+		$select = '
+			<select name="my_parent_pages">
+				<option value="">Ver todas as obras pai</option>';
+		$current = isset($_GET['my_parent_pages']) ? $_GET['my_parent_pages'] : '';
+		foreach ($parent_pages as $page) {
+			$select .= sprintf('
+				<option value="%s"%s>%s</option>', $page->ID, $page->ID == $current ? ' selected="selected"' : '', $page->post_title);
+		}
+		$select .= '
+			</select>';
+		echo $select;
+	} else {
+		return;
+	}
+}
+add_action( 'restrict_manage_posts', 'admin_page_filter_parentpages' );
+
 # ---- metaboxes para dados adicionais ----
 
 global $meta_boxes_obras;
