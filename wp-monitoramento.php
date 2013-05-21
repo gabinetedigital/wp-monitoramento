@@ -69,7 +69,11 @@ add_action( 'init', 'create_post_type_monitoramento' );
 function fws_admin_posts_filter( $query ) {
     global $pagenow;
     if ( is_admin() && $pagenow == 'edit.php' && !empty($_GET['my_parent_pages'])) {
-        $query->query_vars['post_parent'] = $_GET['my_parent_pages'];
+        if( $_GET['my_parent_pages'] == 'only_top'){
+        	$query->query_vars['post_parent'] = '0';
+        }else{
+        	$query->query_vars['post_parent'] = $_GET['my_parent_pages'];
+        }
     }
 }
 add_filter( 'parse_query', 'fws_admin_posts_filter' );
@@ -80,10 +84,12 @@ function admin_page_filter_parentpages() {
 		$sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'gdobra' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
 		// $sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'page' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
 		$parent_pages = $wpdb->get_results($sql, OBJECT_K);
+		$current = isset($_GET['my_parent_pages']) ? $_GET['my_parent_pages'] : '';
+		$selpais = "only_top" == $current ? ' selected="selected"' : '';
 		$select = '
 			<select name="my_parent_pages">
-				<option value="">Ver todas as obras pai</option>';
-		$current = isset($_GET['my_parent_pages']) ? $_GET['my_parent_pages'] : '';
+				<option value="">- Ver todas as obras -</option>
+				<option value="only_top" '.$selpais.'>- Ver somente as obras pai -</option>';
 		foreach ($parent_pages as $page) {
 			$select .= sprintf('
 				<option value="%s"%s>%s</option>', $page->ID, $page->ID == $current ? ' selected="selected"' : '', $page->post_title);
