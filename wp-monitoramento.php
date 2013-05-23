@@ -30,7 +30,6 @@ include("wp-monitoramento.post.php");
 include("wp-monitoramento.xmlrpc.php");
 
 
-
 function create_post_type_monitoramento() {
 	register_post_type( 'gdobra',
 		array(
@@ -114,16 +113,16 @@ $meta_boxes_obras = array();
 # O campo "nohistory" não é utilizado pelo 'RW_Meta_Box'. É somente para dizer que este campo não
 # vai ser guardado no revision do WP.
 $gd_obras_custom_fields = array(
-		array(	'name'		=> 'Descritivo de Status da Obra',
-				'id'		=> $gdobras_prefix . 'descritivo_status',
-				'desc'		=> '',
-				'type'		=> 'wysiwyg'	),
+//		array(	'name'		=> 'Descritivo de Status da Obra',
+//				'id'		=> $gdobras_prefix . 'descritivo_status',
+//				'desc'		=> '',
+//				'type'		=> 'wysiwyg'	),
 		array(	'name'		=> '% Execução da Obra',
 				'id'		=> $gdobras_prefix . 'porc_concluido',
 				'desc'		=> 'Porcentagem da obra fisica concluida',
 				'type'		=> 'text'	),
 		array(	'name'		=> 'Início Efetivo',
-				'id'		=> $gdobras_prefix . 'incio_efetivo',
+				'id'		=> $gdobras_prefix . 'inicio_efetivo',
 				'desc'		=> '',
 				'type'		=> 'date'	),
 		array(	'name'		=> 'Fim Previsto',
@@ -147,11 +146,11 @@ $gd_obras_custom_fields = array(
 				'id'		=> $gdobras_prefix . 'projeto',
 				'desc'		=> '',
 				'type'		=> 'text'	),
-		array(	'name'		=> 'Tema',
-				'id'		=> $gdobras_prefix . 'tema',
-				'desc'		=> '',
-				'type'		=> 'select',
-				'options'   => array('saude' => "Saúde", 'seguranca' => "Segurança", 'transito' => "Trânsito")	),
+//		array(	'name'		=> 'Tema',
+//				'id'		=> $gdobras_prefix . 'tema',
+//				'desc'		=> '',
+//				'type'		=> 'select',
+//				'options'   => array('saude' => "Saúde", 'seguranca' => "Segurança", 'transito' => "Trânsito")	),
 		array(	'name'		=> 'Url Stream',
 				'id'		=> $gdobras_prefix . 'stream',
 				'desc'		=> '',
@@ -159,17 +158,18 @@ $gd_obras_custom_fields = array(
 		array(	'name'		=> 'Coordenadas da Obra',
 				'id'		=> $gdobras_prefix . 'coordenadas',
 				'desc'		=> '',
+				'clone'     => true,
 				'type'		=> 'text'	),
 		array(	'name'		=> 'Município',
 				'id'		=> $gdobras_prefix . 'municipio',
 				'desc'		=> '',
+				'clone'     => true,
 				'type'		=> 'text'	),
-		array(	'name'		=> 'Evidencias',
-				'id'		=> $gdobras_prefix . 'evidencia',
+		array(	'name'		=> 'Código SME',
+				'id'		=> $gdobras_prefix . 'numcodigopk',
 				'desc'		=> '',
-				'type'		=> 'file',
-				'nohistory'	=> true ),
-
+				'type'		=> 'text'	),
+			
 		array(	'name'		=> 'Vídeo',
 				'id'		=> $gdobras_prefix . 'video',
 				'desc'		=> 'Link do video. (Para itens da timeline)',
@@ -187,6 +187,11 @@ $gd_obras_custom_fields = array(
 				'id'		=> $gdobras_prefix . 'voto_score',
 				'desc'		=> 'Nro de votos negativos recebidos. (Para itens da timeline)',
 				'type'		=> 'number'	),
+//		array(	'name'		=> 'Evidencias',
+//				'id'		=> $gdobras_prefix . 'evidencia',
+//				'desc'		=> '',
+//				'type'		=> 'file',
+//				'nohistory'	=> true ),
 	);
 
 $meta_boxes_obras[] = array(
