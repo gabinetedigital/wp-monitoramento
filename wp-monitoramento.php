@@ -169,6 +169,24 @@ $gd_obras_custom_fields = array(
 				'desc'		=> '',
 				'type'		=> 'file',
 				'nohistory'	=> true ),
+
+		array(	'name'		=> 'Vídeo',
+				'id'		=> $gdobras_prefix . 'video',
+				'desc'		=> 'Link do video. (Para itens da timeline)',
+				'type'		=> 'text'	),
+
+		array(	'name'		=> 'Votos Positivos',
+				'id'		=> $gdobras_prefix . 'voto_up',
+				'desc'		=> 'Nro de votos positivos recebidos. (Para itens da timeline)',
+				'type'		=> 'number'	),
+		array(	'name'		=> 'Votos Negativos',
+				'id'		=> $gdobras_prefix . 'voto_down',
+				'desc'		=> 'Nro de votos negativos recebidos. (Para itens da timeline)',
+				'type'		=> 'number'	),
+		array(	'name'		=> 'Score',
+				'id'		=> $gdobras_prefix . 'voto_score',
+				'desc'		=> 'Nro de votos negativos recebidos. (Para itens da timeline)',
+				'type'		=> 'number'	),
 	);
 
 $meta_boxes_obras[] = array(
