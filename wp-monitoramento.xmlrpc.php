@@ -189,10 +189,100 @@ function monitoramento_getObraTimeline($args) {
     return $struct;
 }
 
+function monitoramento_getObraStatsFilhos($args){
+
+    global $wpdb;
+
+    if (!is_array($args = _monit_method_header($args)))
+        return $args;
+
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+
+    if (isset($args[1])){
+        // Conta todos os filhos de uma obra.
+        $post_pai = $args[1];
+
+        $querystr = "
+            SELECT count(1) filhos
+            FROM $wpdb->posts
+            WHERE $wpdb->posts.post_parent = $post_pai
+            AND $wpdb->posts.post_status = 'publish'
+            AND $wpdb->posts.post_type = 'gdobra'
+        ";
+    }else{
+        // Conta todos os items de timeline de obras. TOTAL GERAL
+        $querystr = "
+            SELECT count(1) filhos
+            FROM $wpdb->posts
+            WHERE $wpdb->posts.post_status = 'publish'
+            AND $wpdb->posts.post_type = 'gdobra'
+        ";
+    }
+
+    // error_log($querystr);
+    $pageposts = $wpdb->get_results($querystr, OBJECT);
+    // error_log( print_r( $pageposts, True) );
+
+    foreach ($pageposts as $key) {
+        return $pageposts[0]->filhos;
+    }
+
+    return 0;
+}
+
+function monitoramento_getObraStatsVotos($args){
+
+    global $wpdb;
+
+    if (!is_array($args = _monit_method_header($args)))
+        return $args;
+
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+
+    if (isset($args[1])){
+        // Conta todos os filhos de uma obra.
+        $post_id = $args[1];
+
+        $querystr = "
+            SELECT sum(wpostmeta.meta_value) votos
+            FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta
+            WHERE wposts.ID = $post_id
+            AND wposts.ID = wpostmeta.post_id
+            AND wpostmeta.meta_key = 'gdobra_voto_up'
+            AND wposts.post_status = 'publish'
+            AND wposts.post_type = 'gdobra'
+            ";
+    }else{
+        // Conta todos os items de timeline de obras. TOTAL GERAL
+        $querystr = "
+            SELECT sum(wpostmeta.meta_value) votos
+            FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta
+            WHERE wposts.ID = wpostmeta.post_id
+            AND wpostmeta.meta_key = 'gdobra_voto_up'
+            AND wposts.post_status = 'publish'
+            AND wposts.post_type = 'gdobra'
+            ";
+    }
+
+    error_log($querystr);
+    $pageposts = $wpdb->get_results($querystr, OBJECT);
+    // error_log( print_r( $pageposts, True) );
+
+    foreach ($pageposts as $key) {
+        return $pageposts[0]->votos;
+    }
+
+    return 0;
+}
+
 add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObras'] = 'monitoramento_getObras';
     $methods['monitoramento.getObra'] = 'monitoramento_getObra';
     $methods['monitoramento.getObraTimeline'] = 'monitoramento_getObraTimeline';
+    $methods['monitoramento.getObraStatsFilhos'] = 'monitoramento_getObraStatsFilhos';
+    $methods['monitoramento.getObraStatsVotos'] = 'monitoramento_getObraStatsVotos';
     return $methods;
 });
 
