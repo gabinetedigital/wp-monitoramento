@@ -142,6 +142,7 @@ function monitoramento_getObraTimeline($args) {
     #
     # Este método retorna todos os posts(gdobra) filhos de um gdobra específico.
     # São os itens da 'timeline'
+    # Se um id for passado, retorna somente aquele item especifico
     #
     if (!is_array($args = _monit_method_header($args)))
         return $args;
@@ -154,14 +155,26 @@ function monitoramento_getObraTimeline($args) {
     $post_type = "gdobra";
     $the_parent = $args[1];
 
-    $query=array(
-      'post_parent' => $the_parent,
-      'post_type' => $post_type,
-      'numberposts' => 10,
-      'post_status' => 'publish',
-      'orderby' => 'post_date',
-      'order' => 'desc'
-    );
+    if (!isset($args[2])){
+        $query=array(
+          'post_parent' => $the_parent,
+          'post_ID' => $args[2], # --> o ID do item da timeline
+          'post_type' => $post_type,
+          'numberposts' => 10,
+          'post_status' => 'publish',
+          'orderby' => 'post_date',
+          'order' => 'desc'
+        );
+    }else{
+        $query=array(
+          'post_parent' => $the_parent,
+          'post_type' => $post_type,
+          'numberposts' => 10,
+          'post_status' => 'publish',
+          'orderby' => 'post_date',
+          'order' => 'desc'
+        );
+    }
     $my_posts = get_posts($query);
     error_log( print_r( (array)$my_posts[0], True) );
     if( $my_posts ) {
