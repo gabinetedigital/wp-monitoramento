@@ -155,27 +155,14 @@ function monitoramento_getObraTimeline($args) {
     $post_type = "gdobra";
     $the_parent = $args[1];
 
+    // Utilizado get_pages ao invés de get_posts pois get_pages retorna a arvore correta dos posts conforme hierarquia.
     if (!isset($args[2])){
-        $query=array(
-          'post_parent' => $the_parent,
-          'post_ID' => $args[2], # --> o ID do item da timeline
-          'post_type' => $post_type,
-          'numberposts' => 10,
-          'post_status' => 'publish',
-          'orderby' => 'post_date',
-          'order' => 'desc'
-        );
+        $theid = $args[2];
+        $my_posts = get_pages("child_of=$the_parent&post_ID=$theid&post_type=$post_type&post_status=publish&orderby=post_date&order=desc");
     }else{
-        $query=array(
-          'post_parent' => $the_parent,
-          'post_type' => $post_type,
-          'numberposts' => 10,
-          'post_status' => 'publish',
-          'orderby' => 'post_date',
-          'order' => 'desc'
-        );
+        $my_posts = get_pages("child_of=$the_parent&post_type=$post_type&post_status=publish&orderby=post_date&order=desc");
     }
-    $my_posts = get_posts($query);
+
     error_log( print_r( (array)$my_posts[0], True) );
     if( $my_posts ) {
         error_log( 'ID on the first post found '.$my_posts[0]->ID );
