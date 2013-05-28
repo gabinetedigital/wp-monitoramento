@@ -25,6 +25,7 @@ include '../../../wp-load.php';
 class gdMonitore {
 	
 	var $userwp			= '5';
+	var $statusPost		= 'pending';
 	var $postType	    = 'gdobra';
 	var $gdobras_prefix = 'gdobra_';
 	var $porc_concluido = 'porc_concluido';
@@ -76,6 +77,36 @@ class gdMonitore {
 			add_post_meta($post_id, $key, $value);
 		}
 	}
+	
+	function gdMonitoreInsertEvidences($post_id, $evidences){
+		foreach ($evidences as $a) {
+			$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->url, $a->dat_documento, $post_id);
+			$post_id_inc = $this->gdMonitoreInsert($my_post);
+			if ($post_id_inc) {
+				$content_type = wp_get_http_headers($a->url);
+				$content_type = $content_type['content-type'];
+				
+				if ($content_type == "image/jpeg" or $content_type == "image/png" or $content_type == "image/gif")
+					set_post_format($post_id_inc, 'image' );
+				else
+					set_post_format($post_id_inc, 'Link' );
+				
+				$myvalues = array(
+					$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk
+					);
+
+				$this->gdMonitoreInsertCustomField($post_id_inc, $myvalues);
+			}
+			
+		}
+	}
+	
+	function gdMonitoreInsertSituation($post_id, $situation){
+		foreach ($situation as $a) {
+			$my_post = $this->gdMonitoreMontaPost(NULL, $a->num_codigo_pk, $a->str_situacao, $a->dat_alteracao, $post_id);
+			$this->gdMonitoreInsert($my_post);
+		}	
+	}
 		
 	function gdMonitoreupdate($my_post){
 		$post_id =   wp_update_post( $my_post );
@@ -98,21 +129,24 @@ class gdMonitore {
 		return $valor;
 	} 
 
-	function gdMonitoreMontaPostInsert($titulo, $descricao){
+
+	function gdMonitoreMontaPost($post_id, $title, $content, $post_date, $post_parent){
 		$my_post = array(
-			'post_title'     => $titulo,
-			'post_content'   => $descricao,
-			'post_status'    => 'pending',
+			'ID'			 => $post_id,
+			'post_title'     => $title,
+			'post_content'   => $content,
+			'post_status'    => $this->statusPost,
 			'post_type'	     => $this->postType,
 			'post_author'    => $this->userwp,
-			'post_date'	     => date("Y-m-d H:i:s"),
+			'post_parent'    => $post_parent,
+			'post_date'	     => $post_date,
 			'post_date_gmt'  => date("Y-m-d H:i:s"),
 			'comment_status' => 'open'
-			
 			);
 		return $my_post;
 	}
 
+	
 	function gdMonitoreMontaPostUpdate($post_id, $titulo, $descricao){
 		$my_post = array(
 			'ID'             => $post_id,	
@@ -186,7 +220,7 @@ foreach ($rs as $c){
 		if ($val) {
 			echo "Update<br>";
 		} else {
-			$my_post = $rsClasse->gdMonitoreMontaPostInsert($c->str_titulo_obra, $c->str_descricao_obra);
+			$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
 			$post_id = $rsClasse->gdMonitoreInsert($my_post);
 			if ($post_id){
 				$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
@@ -201,8 +235,11 @@ foreach ($rs as $c){
 																 $c->num_codigo_pk);
 				
 				$rsClasse->gdMonitoreInsertCustomField($post_id, $myvalues);
+				$rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
+				$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
+				
 			}
-			echo "Insert<br>";
+			echo "<br>Inserido com Sucesso<br>";
 		}
 		
 	}
