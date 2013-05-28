@@ -78,6 +78,12 @@ class gdMonitore {
 		}
 	}
 	
+	function gdMonitoreUpdateCustomField($post_id, $myvalues){
+		foreach ($myvalues as $key => $value) {
+			update_post_meta($post_id, $key, $value);
+		}
+	}
+	
 	function gdMonitoreInsertEvidences($post_id, $evidences){
 		foreach ($evidences as $a) {
 			$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->url, $a->dat_documento, $post_id);
@@ -108,7 +114,7 @@ class gdMonitore {
 		}	
 	}
 		
-	function gdMonitoreupdate($my_post){
+	function gdMonitoreUpdate($my_post){
 		$post_id =   wp_update_post( $my_post );
 		return $post_id;
 	}
@@ -218,10 +224,28 @@ foreach ($rs as $c){
 		//Verifica se já existe o post da obra
 		$val = $rsClasse->gdMonitoreVerificaObra($c->num_codigo_pk);
 		if ($val) {
-			echo "Update<br>";
+			$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
+			$post_id = $rsClasse->gdMonitoreUpdate($my_post);
+			$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
+																 $c->dat_inicio_real, 
+																 $c->dat_termino_prevista, 
+																 $c->num_val_global, 
+																 $c->str_nome_empresa_contratada, 
+																 $c->objective, 
+																 $c->project, 
+																 $c->customFields,
+																 $c->cities,
+																 $c->num_codigo_pk);
+			$rsClasse->gdMonitoreUpdateCustomField($post_id, $myvalues);
+			//$rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
+			//$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
+			
+			
+			echo "<br>Atualizado com Sucesso<br>";
 		} else {
 			$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
 			$post_id = $rsClasse->gdMonitoreInsert($my_post);
+			
 			if ($post_id){
 				$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
 																 $c->dat_inicio_real, 
