@@ -156,7 +156,7 @@ function monitoramento_getObraTimeline($args) {
     $the_parent = $args[1];
 
     // Utilizado get_pages ao invés de get_posts pois get_pages retorna a arvore correta dos posts conforme hierarquia.
-    if (!isset($args[2])){
+    if (isset($args[2])){
         $theid = $args[2];
         $my_posts = get_pages("child_of=$the_parent&post_ID=$theid&post_type=$post_type&post_status=publish&orderby=post_date&order=desc");
     }else{
