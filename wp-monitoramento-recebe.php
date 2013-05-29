@@ -25,24 +25,25 @@ include '../../../wp-load.php';
 
 class gdMonitore {
 	
-	var $userwp			= '5';
-	var $statusPost		= 'pending';
-	var $postType	    = 'gdobra';
-	var $gdobras_prefix = 'gdobra_';
-	var $porc_concluido = 'porc_concluido';
-	var $ini_efetivo    = 'inicio_efetivo';
-	var $fim_previsto   = 'fim_previsto';
-	var $valor_global   = 'valor_global';
-	var $emp_contratada = 'empresa_contratada';
-	var $objetivo       = 'objetivo_estrategico';
-	var $projeto        = 'projeto';
-	var $stream		    = 'stream';
-	var $coordenadas    = 'coordenadas';
-	var $municipio      = 'municipio';
-	var $numcodigopk    = 'numcodigopk';
-	var $video		    = 'video';
-	var $arquivo	    = 'arquivo';
-	var $imagem		    = 'imagem';
+	var $userwp				= 'gd_gdobra_usuario_admin';
+	var $statusPost			= 'pending';
+	var $postType	    	= 'gdobra';
+	var $gdobras_prefix 	= 'gdobra_';
+	var $gdTituloSituation 	= 'Governo Responde ';
+	var $porc_concluido 	= 'porc_concluido';
+	var $ini_efetivo    	= 'inicio_efetivo';
+	var $fim_previsto   	= 'fim_previsto';
+	var $valor_global   	= 'valor_global';
+	var $emp_contratada 	= 'empresa_contratada';
+	var $objetivo       	= 'objetivo_estrategico';
+	var $projeto        	= 'projeto';
+	var $stream		    	= 'stream';
+	var $coordenadas    	= 'coordenadas';
+	var $municipio      	= 'municipio';
+	var $numcodigopk    	= 'numcodigopk';
+	var $video		    	= 'video';
+	var $arquivo	    	= 'arquivo';
+	var $imagem		    	= 'imagem';
 	
 
     public function gdMonitoreChamada($url)
@@ -59,16 +60,21 @@ class gdMonitore {
 	public function gdMonitoreMontaUrl(){
 
 		$timestmp  = time();
-		$apiKey     = 'myPublicKey';
-		$PrivateKey = '3248cafb4a54264cf3d139ca35976d51104b7808c41b8f7a1dcc3cb68a946820';
-		$parturl    = '/sme/obras/list.json?';
-		$url 		= "http://smegov.des.procergs.reders";
+		$apiKey     = $this->gdMonitoreGetOption('gd_gdobra_apikey');
+		$PrivateKey = $this->gdMonitoreGetOption('gd_gdobra_privatekey');
+		$parturl    = $this->gdMonitoreGetOption('gd_gdobra_parturl');
+		$url 		= $this->gdMonitoreGetOption('gd_gdobra_url');
 		
 		$call = 'GET '.$parturl."apiKey=".$apiKey."&timestamp=".$timestmp;
 		$Signature = hash_hmac('sha256', $call, $PrivateKey);
 		$url = $url.$parturl."apiKey=".$apiKey."&signature=".$Signature."&timestamp=".$timestmp;
 
 		return $url;
+	}
+	
+	function gdMonitoreGetOption($option){
+		
+		return get_option($option);
 	}
 
 	function gdMonitoreInsert($my_post){
@@ -89,16 +95,10 @@ class gdMonitore {
 	}
 	
 	function gdMonitoreInsertEvidences($post_id, $evidences){
-		global $wpdb;
+		
 		foreach ($evidences as $a) {
 			
-			$sql = $wpdb->prepare("	SELECT  id 
-									FROM    wp_posts 
-									WHERE   post_parent in ($post_id) and post_type = 'gdobra' 
-									AND   	post_date <= '".$a->dat_documento."' 
-									ORDER   by post_date desc
-									LIMIT   1");
-			$post_parent_id = $wpdb->get_var($sql);
+			$post_parent_id = $this->gdMonitorePostParent($post_id, $a->dat_documento);
 			
 			$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->str_resumo, $a->dat_documento, $post_parent_id);
 			$post_id_inc = $this->gdMonitoreInsert($my_post);
@@ -133,8 +133,8 @@ class gdMonitore {
 	
 	function gdMonitoreInsertSituation($post_id, $situation){
 		foreach ($situation as $a) {
-			$datepost = $a->dat_alteracao;
-			$title = "Governo Responde - ".substr($datepost,8,2).'/'.substr($datepost,5,2).'/'.substr($datepost,0,4);
+			
+			$title = $this->gdMonitoreMontaTituloSituation($a->dat_alteracao);
 			$my_post = $this->gdMonitoreMontaPost(NULL, $title, $a->str_situacao, $a->dat_alteracao, $post_id);
 			$post_id_parent = $this->gdMonitoreInsert($my_post);
 			set_post_format($post_id_parent, 'status' );
@@ -153,7 +153,96 @@ class gdMonitore {
 		return $post_id;
 	}
 
-	function gdMonitoreVerificaObra($post_id){
+	function gdMonitoreUpdateSituation($post_parent, $situation){
+		foreach ($situation as $a) {
+			$title 	= $this->gdMonitoreMontaTituloSituation($a->dat_alteracao);
+			$val 	= $this->gdMonitoreVerificaCodigoPk($a->num_codigo_pk);
+			if ($val) { 
+				$my_post = $this->gdMonitoreMontaPost($val, $title, $a->str_situacao, $a->dat_alteracao, $post_parent);
+				$post_id_parent = $this->gdMonitoreUpdate($my_post);
+
+			} else {
+				$my_post = $this->gdMonitoreMontaPost(NULL, $title, $a->str_situacao, $a->dat_alteracao, $post_parent);
+				$post_id_parent = $this->gdMonitoreInsert($my_post);
+				set_post_format($post_id_parent, 'status' );
+				$myvalues = array(
+					$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk,
+				);
+				$this->gdMonitoreInsertCustomField($post_id_parent, $myvalues);
+			}
+
+		}
+	}
+	
+	function gdMonitoreUpdateEvidences($post_id, $evidences){
+		
+		foreach ($evidences as $a) {
+			
+			$post_parent_id = $this->gdMonitorePostParent($post_id, $a->dat_documento);
+			
+			$val 	= $this->gdMonitoreVerificaCodigoPk($a->num_codigo_pk);
+			if ($val) { 
+				$my_post = $this->gdMonitoreMontaPost($val, $a->str_titulo, $a->str_resumo, $a->dat_documento, $post_parent_id);
+				$post_id_inc = $this->gdMonitoreUpdate($my_post);
+
+				$content_type = $this->gdMonitoreTipoArquivo($a->str_nome_fisico_arquivo);
+					
+				$arvalues = "";
+					
+				if ($content_type == "jpg" or $content_type == "png" or $content_type == "gif"){
+					set_post_format($val, 'image' );
+					$arvalues = $this->gdobras_prefix.$this->imagem; 
+				}
+				else if ($content_type == "webm" or $content_type == "ogg" or $content_type == "mpr4" ){
+					set_post_format($val, 'video' );
+					$arvalues = $this->gdobras_prefix.$this->video;
+				}
+				else {
+					set_post_format($val, 'link' );
+					$arvalues = $this->gdobras_prefix.$this->arquivo;
+				}
+					
+				$myvalues = array(
+					$arvalues => $a->url
+				);
+	
+				$this->gdMonitoreInsertCustomField($val, $myvalues);
+				
+			} else {
+				$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->str_resumo, $a->dat_documento, $post_parent_id);
+				$post_id_inc = $this->gdMonitoreInsert($my_post);
+				if ($post_id_inc) {
+					$content_type = $this->gdMonitoreTipoArquivo($a->str_nome_fisico_arquivo);
+					
+					$arvalues = "";
+					
+					if ($content_type == "jpg" or $content_type == "png" or $content_type == "gif"){
+						set_post_format($post_id_inc, 'image' );
+						$arvalues = $this->gdobras_prefix.$this->imagem; 
+					}
+					else if ($content_type == "webm" or $content_type == "ogg" or $content_type == "mpr4" ){
+						set_post_format($post_id_inc, 'video' );
+						$arvalues = $this->gdobras_prefix.$this->video;
+					}
+					else {
+						set_post_format($post_id_inc, 'link' );
+						$arvalues = $this->gdobras_prefix.$this->arquivo;
+					}
+					
+					$myvalues = array(
+						$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk,
+						$arvalues => $a->url
+					);
+	
+					$this->gdMonitoreInsertCustomField($post_id_inc, $myvalues);
+				}
+			}
+			
+		}
+	}
+	
+
+	function gdMonitoreVerificaCodigoPk($post_id){
 		$sCodigoPk = $this->gdobras_prefix.$this->numcodigopk;
 		
 		$args = array( 	'post_type' => $this->postType 
@@ -177,7 +266,7 @@ class gdMonitore {
 			'post_content'   => $content,
 			'post_status'    => $this->statusPost,
 			'post_type'	     => $this->postType,
-			'post_author'    => $this->userwp,
+			'post_author'    => $this->gdMonitoreGetOption($userwp),
 			'post_parent'    => $post_parent,
 			'post_date'	     => $post_date,
 			'post_date_gmt'  => date("Y-m-d H:i:s"),
@@ -193,19 +282,28 @@ class gdMonitore {
 		return $arq;
 	}
 
-	
-	function gdMonitoreMontaPostUpdate($post_id, $titulo, $descricao){
-		$my_post = array(
-			'ID'             => $post_id,	
-			'post_title'     => $titulo,
-			'post_content'   => $descricao,
-			'post_author'    => $userwp,
-			'post_date'	     => date("Y-m-d H:i:s"),
-			'post_date_gmt'  => date("Y-m-d H:i:s"),
-			
-			);
-		return $my_post;
+	function gdMonitorePostParent($post_id, $dat_documento){
+		
+		global $wpdb;
+		$sql = $wpdb->prepare("	SELECT  id 
+									FROM    wp_posts 
+									WHERE   post_parent in ($post_id) and post_type = 'gdobra' 
+									AND   	post_date <= '".$dat_documento."' 
+									ORDER   by post_date desc
+									LIMIT   1");
+		$post_parent_id = $wpdb->get_var($sql);
+		
+		return $post_parent_id;
 	}
+
+	function gdMonitoreMontaTituloSituation($datepost){
+
+		$title = $this->gdTituloSituation." - ".substr($datepost,8,2).'/'.substr($datepost,5,2).'/'.substr($datepost,0,4);
+		
+		return $title;
+		
+	}
+	
 
 	function gdMonitoreMontaCamposCustom($porcExec,$dtinicio,$dtfim,$valor,$empresa,$objetivo,$projeto,$urlstream,$municipio,$sCodigoPk){
 
@@ -260,9 +358,9 @@ try{
 }
 foreach ($rs as $c){
 
-	if ($c->num_codigo_pk == 641) {
+	//if ($c->num_codigo_pk == 641) {
 		//Verifica se já existe o post da obra
-		$val = $rsClasse->gdMonitoreVerificaObra($c->num_codigo_pk);
+		$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
 		if ($val) {
 			$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
 			$post_id = $rsClasse->gdMonitoreUpdate($my_post);
@@ -277,8 +375,8 @@ foreach ($rs as $c){
 																 $c->cities,
 																 $c->num_codigo_pk);
 			$rsClasse->gdMonitoreUpdateCustomField($post_id, $myvalues);
-			//$rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
-			//$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
+			$rsClasse->gdMonitoreUpdateSituation($val, $c->publicSituation);
+			$rsClasse->gdMonitoreUpdateEvidences($val, $c->evidences);
 			
 			
 			echo "<br>Atualizado com Sucesso<br>";
@@ -306,7 +404,7 @@ foreach ($rs as $c){
 			echo "<br>Inserido com Sucesso<br>";
 		}
 		
-	}
+	//}
 
 } 
 ?>
