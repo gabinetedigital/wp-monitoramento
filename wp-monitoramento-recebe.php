@@ -170,8 +170,8 @@ class gdMonitore {
 				);
 				$this->gdMonitoreInsertCustomField($post_id_parent, $myvalues);
 			}
-
 		}
+		return $post_id_parent;
 	}
 	
 	function gdMonitoreUpdateEvidences($post_id, $evidences){
@@ -293,6 +293,14 @@ class gdMonitore {
 									LIMIT   1");
 		$post_parent_id = $wpdb->get_var($sql);
 		
+		if (!$post_parent_id){
+			$sql = $wpdb->prepare("	SELECT  id 
+									FROM    wp_posts 
+									WHERE   post_parent in ($post_id) and post_type = 'gdobra' 
+									ORDER   by post_date asc
+									LIMIT   1");
+			$post_parent_id = $wpdb->get_var($sql);
+		}
 		return $post_parent_id;
 	}
 
@@ -358,53 +366,53 @@ try{
 }
 foreach ($rs as $c){
 
-	//if ($c->num_codigo_pk == 641) {
-		//Verifica se já existe o post da obra
-		$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
-		if ($val) {
-			$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
-			$post_id = $rsClasse->gdMonitoreUpdate($my_post);
-			$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
-																 $c->dat_inicio_real, 
-																 $c->dat_termino_prevista, 
-																 $c->num_val_global, 
-																 $c->str_nome_empresa_contratada, 
-																 $c->objective, 
-																 $c->project, 
-																 $c->customFields,
-																 $c->cities,
-																 $c->num_codigo_pk);
-			$rsClasse->gdMonitoreUpdateCustomField($post_id, $myvalues);
-			$rsClasse->gdMonitoreUpdateSituation($val, $c->publicSituation);
-			$rsClasse->gdMonitoreUpdateEvidences($val, $c->evidences);
-			
-			
-			echo "<br>Atualizado com Sucesso<br>";
-		} else {
-			$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
-			$post_id = $rsClasse->gdMonitoreInsert($my_post);
-			
-			if ($post_id){
-				$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
-																 $c->dat_inicio_real, 
-																 $c->dat_termino_prevista, 
-																 $c->num_val_global, 
-																 $c->str_nome_empresa_contratada, 
-																 $c->objective, 
-																 $c->project, 
-																 $c->customFields,
-																 $c->cities,
-																 $c->num_codigo_pk);
-				
-				$rsClasse->gdMonitoreInsertCustomField($post_id, $myvalues);
-				$rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
-				$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
-				
+	//Verifica se já existe o post da obra
+	$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
+	if ($val) {
+		$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
+		$post_id = $rsClasse->gdMonitoreUpdate($my_post);
+		$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
+															 $c->dat_inicio_real, 
+															 $c->dat_termino_prevista, 
+															 $c->num_val_global, 
+															 $c->str_nome_empresa_contratada, 
+															 $c->objective, 
+															 $c->project, 
+															 $c->customFields,
+															 $c->cities,
+															 $c->num_codigo_pk);
+		$rsClasse->gdMonitoreUpdateCustomField($post_id, $myvalues);
+		$post_Situation = $rsClasse->gdMonitoreUpdateSituation($val, $c->publicSituation);
+		if ($post_Situation){
+				$rsClasse->gdMonitoreUpdateEvidences($val, $c->evidences);
 			}
-			echo "<br>Inserido com Sucesso<br>";
+		
+		echo "<br>Atualizado com Sucesso<br>";
+	} else {
+		$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
+		$post_id = $rsClasse->gdMonitoreInsert($my_post);
+		
+		if ($post_id){
+			$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
+															 $c->dat_inicio_real, 
+															 $c->dat_termino_prevista, 
+															 $c->num_val_global, 
+															 $c->str_nome_empresa_contratada, 
+															 $c->objective, 
+															 $c->project, 
+															 $c->customFields,
+															 $c->cities,
+															 $c->num_codigo_pk);
+			
+			$rsClasse->gdMonitoreInsertCustomField($post_id, $myvalues);
+			$post_Situation = $rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
+			if ($post_Situation){
+				$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
+			}
+			
+		}
+		echo "<br>Inserido com Sucesso<br>";
 		}
 		
-	//}
-
 } 
 ?>
