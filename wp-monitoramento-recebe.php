@@ -22,6 +22,7 @@
 header('Content-Type:text/html; charset=utf-8');
 include '../../../wp-load.php';
 
+
 class gdMonitore {
 	
 	var $userwp			= '5';
@@ -39,6 +40,9 @@ class gdMonitore {
 	var $coordenadas    = 'coordenadas';
 	var $municipio      = 'municipio';
 	var $numcodigopk    = 'numcodigopk';
+	var $video		    = 'video';
+	var $arquivo	    = 'arquivo';
+	var $imagem		    = 'imagem';
 	
 
     public function gdMonitoreChamada($url)
@@ -85,21 +89,41 @@ class gdMonitore {
 	}
 	
 	function gdMonitoreInsertEvidences($post_id, $evidences){
+		global $wpdb;
 		foreach ($evidences as $a) {
-			$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->url, $a->dat_documento, $post_id);
+			
+			$sql = $wpdb->prepare("	SELECT  id 
+									FROM    wp_posts 
+									WHERE   post_parent in ($post_id) and post_type = 'gdobra' 
+									AND   	post_date <= '".$a->dat_documento."' 
+									ORDER   by post_date desc
+									LIMIT   1");
+			$post_parent_id = $wpdb->get_var($sql);
+			
+			$my_post = $this->gdMonitoreMontaPost(NULL, $a->str_titulo, $a->str_resumo, $a->dat_documento, $post_parent_id);
 			$post_id_inc = $this->gdMonitoreInsert($my_post);
 			if ($post_id_inc) {
-				$content_type = wp_get_http_headers($a->url);
-				$content_type = $content_type['content-type'];
+				$content_type = $this->gdMonitoreTipoArquivo($a->str_nome_fisico_arquivo);
 				
-				if ($content_type == "image/jpeg" or $content_type == "image/png" or $content_type == "image/gif")
+				$arvalues = "";
+				
+				if ($content_type == "jpg" or $content_type == "png" or $content_type == "gif"){
 					set_post_format($post_id_inc, 'image' );
-				else
-					set_post_format($post_id_inc, 'Link' );
+					$arvalues = $this->gdobras_prefix.$this->imagem; 
+				}
+				else if ($content_type == "webm" or $content_type == "ogg" or $content_type == "mpr4" ){
+					set_post_format($post_id_inc, 'video' );
+					$arvalues = $this->gdobras_prefix.$this->video;
+				}
+				else {
+					set_post_format($post_id_inc, 'link' );
+					$arvalues = $this->gdobras_prefix.$this->arquivo;
+				}
 				
 				$myvalues = array(
-					$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk
-					);
+					$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk,
+					$arvalues => $a->url
+				);
 
 				$this->gdMonitoreInsertCustomField($post_id_inc, $myvalues);
 			}
@@ -109,9 +133,19 @@ class gdMonitore {
 	
 	function gdMonitoreInsertSituation($post_id, $situation){
 		foreach ($situation as $a) {
-			$my_post = $this->gdMonitoreMontaPost(NULL, $a->num_codigo_pk, $a->str_situacao, $a->dat_alteracao, $post_id);
-			$this->gdMonitoreInsert($my_post);
-		}	
+			$datepost = $a->dat_alteracao;
+			$title = "Governo Responde - ".substr($datepost,8,2).'/'.substr($datepost,5,2).'/'.substr($datepost,0,4);
+			$my_post = $this->gdMonitoreMontaPost(NULL, $title, $a->str_situacao, $a->dat_alteracao, $post_id);
+			$post_id_parent = $this->gdMonitoreInsert($my_post);
+			set_post_format($post_id_parent, 'status' );
+
+			$myvalues = array(
+				$this->gdobras_prefix.$this->numcodigopk 	=> $a->num_codigo_pk,
+			);
+
+			$this->gdMonitoreInsertCustomField($post_id_parent, $myvalues);
+		}
+		return $post_id_parent;	
 	}
 		
 	function gdMonitoreUpdate($my_post){
@@ -122,7 +156,7 @@ class gdMonitore {
 	function gdMonitoreVerificaObra($post_id){
 		$sCodigoPk = $this->gdobras_prefix.$this->numcodigopk;
 		
-		$args = array( 	'post_type' => 'gdobra' 
+		$args = array( 	'post_type' => $this->postType 
 					  , 'post_status' => 'any'
 					  , 'meta_key'        => $sCodigoPk
 					  , 'meta_value'      => $post_id
@@ -150,6 +184,13 @@ class gdMonitore {
 			'comment_status' => 'open'
 			);
 		return $my_post;
+	}
+
+	function gdMonitoreTipoArquivo($arq){
+		$arq = strrchr($arq, ".");
+		$arq = strtolower(substr($arq,1,strlen($arq)));
+
+		return $arq;
 	}
 
 	
@@ -217,7 +258,6 @@ try{
 	echo $e->getMessage();
 	
 }
-
 foreach ($rs as $c){
 
 	if ($c->num_codigo_pk == 641) {
@@ -267,7 +307,6 @@ foreach ($rs as $c){
 		}
 		
 	}
-	
-} 
 
+} 
 ?>
