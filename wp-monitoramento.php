@@ -175,6 +175,16 @@ $gd_obras_custom_fields = array(
 				'desc'		=> 'Link do video. (Para itens da timeline)',
 				'type'		=> 'text'	),
 
+		array(	'name'		=> 'Imagem',
+				'id'		=> $gdobras_prefix . 'imagem',
+				'desc'		=> 'Link da Imagem. (Para itens da timeline)',
+				'type'		=> 'text'	),
+
+		array(	'name'		=> 'Arquivo',
+				'id'		=> $gdobras_prefix . 'arquivo',
+				'desc'		=> 'Link do Arquivo. (Para itens da timeline)',
+				'type'		=> 'text'	),
+
 		array(	'name'		=> 'Votos Positivos',
 				'id'		=> $gdobras_prefix . 'voto_up',
 				'desc'		=> 'Nro de votos positivos recebidos. (Para itens da timeline)',
