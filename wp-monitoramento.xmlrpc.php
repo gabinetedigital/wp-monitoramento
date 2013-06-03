@@ -97,6 +97,37 @@ function monitoramento_getObra($args) {
     return $post;
 }
 
+function monitoramento_getObraById($args) {
+    #
+    # Retorna a lista completa dos posts(gdobra)
+    #
+    if (!is_array($args = _monit_method_header($args)))
+        return $args;
+
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+
+    $post_type = "gdobra"; #$args[1];
+
+    if (!isset($args[1]))
+        return null;
+
+    $the_id = $args[1];
+    error_log($the_id);
+
+    $query="include=$the_id&post_type=$post_type&post_status=publish&numberposts=1";
+    $my_posts = get_posts($query);
+
+    error_log( print_r( (array)$my_posts[0], True) );
+    if( $my_posts ) {
+        error_log( 'ID on the first post found monitoramento_getObraById '.$my_posts[0]->ID );
+    }
+
+    $post = _monit_prepare_post( (array)$my_posts[0], $args);
+    // return $my_posts[0];
+    return $post;
+}
+
 function monitoramento_getObras($args) {
     #
     # Retorna a lista completa dos posts(gdobra)
@@ -267,6 +298,7 @@ function monitoramento_getObraStatsVotos($args){
 add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObras'] = 'monitoramento_getObras';
     $methods['monitoramento.getObra'] = 'monitoramento_getObra';
+    $methods['monitoramento.getObraById'] = 'monitoramento_getObraById';
     $methods['monitoramento.getObraTimeline'] = 'monitoramento_getObraTimeline';
     $methods['monitoramento.getObraStatsFilhos'] = 'monitoramento_getObraStatsFilhos';
     $methods['monitoramento.getObraStatsVotos'] = 'monitoramento_getObraStatsVotos';
