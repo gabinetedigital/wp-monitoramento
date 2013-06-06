@@ -295,6 +295,50 @@ function monitoramento_getObraStatsVotos($args){
     return 0;
 }
 
+function monitoramento_getUltimaRespostaGovObra($args){
+    /*
+    Método que retorna o ultima resposta do governo (Status Publico), publicado, de uma obra
+    */
+    global $wpdb;
+
+    if (!is_array($args = _monit_method_header($args)))
+        return $args;
+
+    error_log(' ======================================== ARGS ======================================== ');
+    error_log(print_r($args, True));
+
+    if (isset($args[1])){
+        // Conta todos os filhos de uma obra.
+        $post_pai = $args[1];
+
+        $querystr = "
+            select * from wp_posts
+            where ID in (
+                select max(ID) #, post_title, p.post_parent, format.name formato
+                from wp_posts p, wp_term_relationships r,
+                   (select t.name, tt.term_taxonomy_id from wp_term_taxonomy tt, wp_terms t where t.term_id = tt.term_id and tt.taxonomy = 'post_format') format
+                where p.id = r.object_id
+                and r.term_taxonomy_id = format.term_taxonomy_id
+                and p.post_type = 'gdobra'
+                and p.post_status = 'publish'
+                and format.name = 'post-format-status'
+                and p.post_parent = $post_pai
+            )
+        ";
+    }
+
+    // error_log($querystr);
+    $pageposts = $wpdb->get_results($querystr, OBJECT);
+    // error_log( print_r( $pageposts, True) );
+
+    // foreach ($pageposts as $key) {
+    //     return $pageposts[0]->filhos;
+    // }
+    $post = _monit_prepare_post( (array)$pageposts[0], $args);
+    return $post;
+}
+
+
 add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObras'] = 'monitoramento_getObras';
     $methods['monitoramento.getObra'] = 'monitoramento_getObra';
@@ -302,6 +346,7 @@ add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObraTimeline'] = 'monitoramento_getObraTimeline';
     $methods['monitoramento.getObraStatsFilhos'] = 'monitoramento_getObraStatsFilhos';
     $methods['monitoramento.getObraStatsVotos'] = 'monitoramento_getObraStatsVotos';
+    $methods['monitoramento.getUltimaRespostaGovObra'] = 'monitoramento_getUltimaRespostaGovObra';
     return $methods;
 });
 
