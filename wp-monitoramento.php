@@ -169,7 +169,7 @@ $gd_obras_custom_fields = array(
 				'id'		=> $gdobras_prefix . 'numcodigopk',
 				'desc'		=> '',
 				'type'		=> 'text'	),
-			
+
 		array(	'name'		=> 'Vídeo',
 				'id'		=> $gdobras_prefix . 'video',
 				'desc'		=> 'Link do video. (Para itens da timeline)',
@@ -312,20 +312,20 @@ add_filter( '_wp_post_revision_field_my_meta', 'gdobras_revision_field', 10, 2 )
 // Register Custom Taxonomy
 function gdobra_tema_taxonomy()  {
     $labels = array(
-        'name'                       => 'Temas',
-        'singular_name'              => 'Tema',
-        'menu_name'                  => 'Tema',
-        'all_items'                  => 'Todos os Temas',
-        'parent_item'                => 'Tema pai',
-        'parent_item_colon'          => 'Tema pai:',
-        'new_item_name'              => 'Novo Tema',
-        'add_new_item'               => 'Adicionar novo Tema',
-        'edit_item'                  => 'Editar Tema',
-        'update_item'                => 'Alterar Tema',
-        'separate_items_with_commas' => 'Temas separados por virgulas',
-        'search_items'               => 'Procurar temas',
-        'add_or_remove_items'        => 'Adicionar ou remover temas',
-        'choose_from_most_used'      => 'Escolha um dos temas mais utilizados',
+        'name'                       => 'Secretarias Responsáveis',
+        'singular_name'              => 'Secretaria Responsável',
+        'menu_name'                  => 'Secretaria Responsável',
+        'all_items'                  => 'Todas as Secretarias',
+        'parent_item'                => 'Secretaria pai',
+        'parent_item_colon'          => 'Secretaria pai:',
+        'new_item_name'              => 'Nova Secretaria Responsável',
+        'add_new_item'               => 'Adicionar nova Secretaria Responsável',
+        'edit_item'                  => 'Editar Secretaria',
+        'update_item'                => 'Alterar Secretaria',
+        'separate_items_with_commas' => 'Secretarias Responsáveis separadas por virgulas',
+        'search_items'               => 'Procurar secretarias',
+        'add_or_remove_items'        => 'Adicionar ou remover secretarias',
+        'choose_from_most_used'      => 'Escolha uma das secretarias mais utilizadas',
     );
 
     $rewrite = array(
