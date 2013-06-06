@@ -170,6 +170,13 @@ function monit_post_thumb($post, $params) {
             $thumbs[$size]['width'] = $info[1];
             $thumbs[$size]['height'] = $info[2];
 
+            $size = 'slideshow';
+            $tid = get_post_thumbnail_id($pid);
+            $info = wp_get_attachment_image_src($tid, $size);
+            $thumbs[$size] = array();
+            $thumbs[$size]['url'] = $info[0];
+            $thumbs[$size]['width'] = $info[1];
+            $thumbs[$size]['height'] = $info[2];
         // }
     }
     return $thumbs;
