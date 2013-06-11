@@ -147,8 +147,8 @@ function monitoramento_getObras($args) {
       // 'name' => $the_slug,
       'post_type' => $post_type,
       'post_status' => 'publish',
-      'post_parent'     => 0 # -> Somente os posts PAI
-      //, 'numberposts' => 1
+      'post_parent'     => 0, # -> Somente os posts PAI
+      'numberposts' => -1
     );
     $my_posts = get_posts($query);
 
