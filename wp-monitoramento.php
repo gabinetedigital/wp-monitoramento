@@ -80,8 +80,11 @@ add_filter( 'parse_query', 'fws_admin_posts_filter' );
 function admin_page_filter_parentpages() {
     global $wpdb;
     if (isset($_GET['post_type']) && $_GET['post_type'] == 'gdobra') {
-		$sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'gdobra' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
+		$sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'gdobra' AND post_parent = 0 AND post_status not in ('auto-draft') ORDER BY post_title";
 		// $sql = "SELECT ID, post_title FROM ".$wpdb->posts." WHERE post_type = 'page' AND post_parent = 0 AND post_status = 'publish' ORDER BY post_title";
+		// error_log("QUERY======================");
+		// error_log($sql);
+		// error_log("QUERY======================");
 		$parent_pages = $wpdb->get_results($sql, OBJECT_K);
 		$current = isset($_GET['my_parent_pages']) ? $_GET['my_parent_pages'] : '';
 		$selpais = "only_top" == $current ? ' selected="selected"' : '';
