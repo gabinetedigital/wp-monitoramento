@@ -73,7 +73,7 @@ class gdMonitore {
 	}
 	
 	function gdMonitoreGetOption($option){
-		
+
 		return get_option($option);
 	}
 
@@ -264,14 +264,17 @@ class gdMonitore {
 			'ID'			 => $post_id,
 			'post_title'     => $title,
 			'post_content'   => $content,
-			'post_status'    => $this->statusPost,
 			'post_type'	     => $this->postType,
-			'post_author'    => $this->gdMonitoreGetOption($userwp),
+			'post_author'    => $this->gdMonitoreGetOption($this->userwp),
 			'post_parent'    => $post_parent,
 			'post_date'	     => $post_date,
 			'post_date_gmt'  => date("Y-m-d H:i:s"),
 			'comment_status' => 'open'
 			);
+		if(empty($post_id)){
+			$ar_status =  array('post_status' => $this->statusPost);
+			$my_post = array_merge($my_post,$ar_status );
+		}
 		return $my_post;
 	}
 
@@ -318,6 +321,7 @@ class gdMonitore {
 		 
 		$objetivo = !empty($objetivo->title) ? $objetivo->title : '';
 		$projeto  = !empty($projeto->title)  ? $projeto->title  : '';
+		$urlstream = '';
 		if (!empty($urlstream)) {
 			foreach ($urlstream as $a) {
 				if ($a->name == "URL stream") {
@@ -364,12 +368,13 @@ try{
 	echo $e->getMessage();
 	
 }
+
 foreach ($rs as $c){
 
 	//Verifica se já existe o post da obra
 	$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
 	if ($val) {
-		$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
+		$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_olho_obra, date('Y-m-d H:i:s'),NULL);
 		$post_id = $rsClasse->gdMonitoreUpdate($my_post);
 		$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao, 
 															 $c->dat_inicio_real, 
@@ -389,7 +394,7 @@ foreach ($rs as $c){
 		
 		echo "<br>Atualizado com Sucesso<br>";
 	} else {
-		$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_obra, date('Y-m-d H:i:s'),NULL);
+		$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_olho_obra, date('Y-m-d H:i:s'),NULL);
 		$post_id = $rsClasse->gdMonitoreInsert($my_post);
 		
 		if ($post_id){
