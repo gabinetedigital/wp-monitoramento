@@ -333,9 +333,11 @@ class gdMonitore {
 		if (!empty($municipio)) {
 			$cont = 0;
 			foreach ($municipio as $a) {
-				$mun[$cont] = $a->str_nome;
-				$coo[$cont] = $a->num_latitude.",".$a->num_longitude;
-				$cont++; 
+				if ($a->beneficiado == false){
+					$mun[$cont] = $a->str_nome;
+					$coo[$cont] = $a->num_latitude.",".$a->num_longitude;
+					$cont++;
+				} 
 			}
 		} else {
 			$mun = '';
