@@ -242,27 +242,27 @@ add_action('admin_init', 'wp_obras_register_meta_boxes' );
 # ------------------------------------------------------------------
 # Métodos utilizados para salvar as revisões dos dados nas revisões dos posts. \/ \/ \/
 
-function gdobras_save_post( $post_id, $post ) {
+// function gdobras_save_post( $post_id, $post ) {
 
-	$parent_id = wp_is_post_revision( $post_id );
+// 	$parent_id = wp_is_post_revision( $post_id );
 
-	global $gd_obras_custom_fields;
-	if ( $parent_id ) {
-		$parent  = get_post( $parent_id );
+// 	global $gd_obras_custom_fields;
+// 	if ( $parent_id ) {
+// 		$parent  = get_post( $parent_id );
 
-		foreach ($gd_obras_custom_fields as $cf) {
-			if(!array_key_exists( 'nohistory', $cf )){
-				$meta_name = $cf['id'];
-				$my_meta = get_post_meta( $parent->ID, $meta_name, true );
-				error_log("SALVANDO ".$meta_name." VLR:".$my_meta);
-				if ( $my_meta != Null )
-					add_metadata( 'post', $post_id, $meta_name, $my_meta );
-			}
-		}
+// 		foreach ($gd_obras_custom_fields as $cf) {
+// 			if(!array_key_exists( 'nohistory', $cf )){
+// 				$meta_name = $cf['id'];
+// 				$my_meta = get_post_meta( $parent->ID, $meta_name, true );
+// 				error_log("SALVANDO ".$meta_name." VLR:".$my_meta);
+// 				if ( $my_meta != Null )
+// 					add_metadata( 'post', $post_id, $meta_name, $my_meta );
+// 			}
+// 		}
 
-	}
-}
-add_action( 'save_post', 'gdobras_save_post' );
+// 	}
+// }
+// add_action( 'save_post', 'gdobras_save_post' );
 
 # -----
 

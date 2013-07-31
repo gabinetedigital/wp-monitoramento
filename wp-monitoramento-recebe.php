@@ -90,7 +90,9 @@ class gdMonitore {
 	
 	function gdMonitoreUpdateCustomField($post_id, $myvalues){
 		foreach ($myvalues as $key => $value) {
+			
 			update_post_meta($post_id, $key, $value);
+
 		}
 	}
 	
@@ -343,13 +345,22 @@ class gdMonitore {
 			$mun = '';
 			$coo = '';
 		}
+
+		// error_log("EMPRESA ========================================++++>");
+		// error_log($empresa);
+		$emp = split(",", $empresa);
+		// error_log(print_r($emp, true));
+		
+		// error_log("COORDENADAS ====================================++++>");
+		// error_log(print_r($coo, true));
+		// // error_log($empresa);
 	
 		$my_post = array(
 			$this->gdobras_prefix.$this->porc_concluido => $porcExec,
 			$this->gdobras_prefix.$this->ini_efetivo 	=> $dtinicio,
 			$this->gdobras_prefix.$this->fim_previsto 	=> $dtfim,
 			$this->gdobras_prefix.$this->valor_global 	=> $valor,
-			$this->gdobras_prefix.$this->emp_contratada	=> $empresa,
+			$this->gdobras_prefix.$this->emp_contratada	=> $emp,
 			$this->gdobras_prefix.$this->objetivo 		=> $objetivo,
 			$this->gdobras_prefix.$this->projeto 		=> $projeto,
 			$this->gdobras_prefix.$this->stream 		=> $urlstream,
