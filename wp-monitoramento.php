@@ -242,27 +242,29 @@ add_action('admin_init', 'wp_obras_register_meta_boxes' );
 # ------------------------------------------------------------------
 # Métodos utilizados para salvar as revisões dos dados nas revisões dos posts. \/ \/ \/
 
-// function gdobras_save_post( $post_id, $post ) {
+function gdobras_save_post( $post_id ) {
 
-// 	$parent_id = wp_is_post_revision( $post_id );
+    if( !wp_is_post_revision($post_id) ){
 
-// 	global $gd_obras_custom_fields;
-// 	if ( $parent_id ) {
-// 		$parent  = get_post( $parent_id );
+        // error_log("SALVANDO O POST".$post_id);
+        $post = get_post($post_id);
+        if( !wp_is_post_revision( $post_id ) &&
+            $post->post_status == "publish" &&
+            get_post_format($post_id) == "status" ){
 
-// 		foreach ($gd_obras_custom_fields as $cf) {
-// 			if(!array_key_exists( 'nohistory', $cf )){
-// 				$meta_name = $cf['id'];
-// 				$my_meta = get_post_meta( $parent->ID, $meta_name, true );
-// 				error_log("SALVANDO ".$meta_name." VLR:".$my_meta);
-// 				if ( $my_meta != Null )
-// 					add_metadata( 'post', $post_id, $meta_name, $my_meta );
-// 			}
-// 		}
+            error_log("Chamando /sendnews para post ID ".$post->post_parent);
+            $base_url = get_option("BASE_URL");
+            $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
+        }
 
-// 	}
-// }
-// add_action( 'save_post', 'gdobras_save_post' );
+    }
+
+
+    // Chama a url do GD que envia o aviso aos seguidores das obras que teve
+    // nova atualiação.
+
+}
+add_action( 'save_post', 'gdobras_save_post' );
 
 # -----
 
