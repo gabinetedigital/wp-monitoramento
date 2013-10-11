@@ -246,11 +246,14 @@ function gdobras_publish_post( $post ) {
 
     $post_id = $post->ID;
 
-    // Chama a url do GD que envia o aviso aos seguidores das obras que teve
-    // nova atualiação.
-    error_log("Chamando /sendnews para post ID ".$post->post_parent);
-    $base_url = get_option("gd_base_url");
-    $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
+    if ( $post->post_type == 'gdobra' && get_post_format($post_id) == "status" ){
+        // Chama a url do GD que envia o aviso aos seguidores das obras que teve
+        // nova atualiação.
+        error_log("Chamando /sendnews para post ID ".$post->post_parent);
+        $base_url = get_option("gd_base_url");
+        $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
+    }
+
 
 }
 add_action( 'pending_to_publish', 'gdobras_publish_post' );
