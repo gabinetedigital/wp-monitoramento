@@ -242,29 +242,20 @@ add_action('admin_init', 'wp_obras_register_meta_boxes' );
 # ------------------------------------------------------------------
 # Métodos utilizados para salvar as revisões dos dados nas revisões dos posts. \/ \/ \/
 
-function gdobras_save_post( $post_id ) {
+function gdobras_publish_post( $post ) {
 
-    if( !wp_is_post_revision($post_id) ){
-
-        // error_log("SALVANDO O POST".$post_id);
-        $post = get_post($post_id);
-        if( !wp_is_post_revision( $post_id ) &&
-            $post->post_status == "publish" &&
-            get_post_format($post_id) == "status" ){
-
-            error_log("Chamando /sendnews para post ID ".$post->post_parent);
-            $base_url = get_option("BASE_URL");
-            $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
-        }
-
-    }
-
+    $post_id = $post->ID;
 
     // Chama a url do GD que envia o aviso aos seguidores das obras que teve
     // nova atualiação.
+    error_log("Chamando /sendnews para post ID ".$post->post_parent);
+    $base_url = get_option("gd_base_url");
+    $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
 
 }
-add_action( 'save_post', 'gdobras_save_post' );
+add_action( 'pending_to_publish', 'gdobras_publish_post' );
+add_action( 'draft_to_publish', 'gdobras_publish_post' );
+// add_action( 'save_post', 'gdobras_save_post' );
 
 # -----
 
