@@ -15,6 +15,57 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Total number of comments in this post and your childs
+ */
+function monit_post_total_contributions($post){
+    // error_log("POST   >>>>>>>>>>>>");
+    // error_log( print_r($post, True) );
+    // error_log("Buscando timeline de ID:".$post['ID']);
+    $timeline = get_pages("child_of=".$post['ID']."&post_type=gdobra&post_status=publish&sort_column=post_date&sort_order=desc");
+    if( $timeline ) {
+        // error_log("TIMELINE>>>>>>>>>>>>");
+        // error_log( print_r($timeline, True) );
+        // error_log("TIMELINE<<<<<<<<<<<<");
+        // error_log(count($timeline));
+        // error_log("COUNT<<<<<<<<<<<<");
+        return count($timeline);
+    } else {
+        return 0;
+    }
+}
+
+
+/**
+ * Total number of user that following this post
+ */
+function monit_post_total_follows($post){
+    global $wpdb;
+
+    $obraid = $post['ID'];
+    $querystr = "
+        SELECT count(1) follows FROM user_follow where obra_id = $obraid
+    ";
+
+    $counts = $wpdb->get_results($querystr, OBJECT);
+
+    // error_log("COUNTS>>>>>>>>>>>>");
+    // error_log( print_r($counts, True) );
+    // error_log("COUNTS<<<<<<<<<<<<");
+    // error_log( $counts[0]->follows );
+    // error_log( $counts['follows'] );
+    // error_log("COUNTSS<<<<<<<<<<<<");
+
+    return $counts[0]->follows;
+}
+
+/**
+ * Total number of "like" in this post and your childs
+ */
+function monit_post_total_likes($post){
+    return 13;
+}
+
 function _monit_method_header(&$args) {
     // We don't like smart-ass people
     global $wp_xmlrpc_server;
@@ -52,6 +103,9 @@ function _monit_prepare_post($post, $params) {
         'tags' => monit_post_tags($post),
         'tags_object' => monit_post_tags_object($post),
         'comments' => monit_post_comment_info($post),
+        'total_contributions' => monit_post_total_contributions($post),
+        'total_likes' => monit_post_total_likes($post),
+        'total_follows' => monit_post_total_follows($post),
         'thumbs' => monit_post_thumb($post, $params),
         'excerpt' => monit_post_excerpt($post),
         'content' => monit_post_content($post),
