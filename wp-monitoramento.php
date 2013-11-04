@@ -208,6 +208,11 @@ $gd_obras_custom_fields = array(
 				'id'		=> $gdobras_prefix . 'link_maps',
 				'desc'		=> 'Link customizado para google maps',
 				'type'		=> 'text'	),
+        array(  'name'      => 'Obra Entregue?',
+                'id'        => $gdobras_prefix . 'obra_entregue',
+                'desc'      => 'Indica se a obra já foi entregue aos cidadãos',
+                'type'      => 'checkbox' ),
+
 //		array(	'name'		=> 'Evidencias',
 //				'id'		=> $gdobras_prefix . 'evidencia',
 //				'desc'		=> '',
@@ -251,7 +256,7 @@ function gdobras_publish_post( $post ) {
         // nova atualiação.
         error_log("Chamando /sendnews para post ID ".$post->post_parent);
         $base_url = get_option("gd_base_url");
-        $lines = file($base_url.'monitore/sendnews?obra='.$post->post_parent);
+        $lines = file($base_url.'deolho/sendnews?obra='.$post->post_parent);
     }
 
 
