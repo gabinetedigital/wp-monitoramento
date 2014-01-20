@@ -35,6 +35,10 @@ function monit_post_total_contributions($post){
     }
 }
 
+function monit_post_total_comments($post){
+    $comments_count = wp_count_comments( $post['ID'] );
+    return $comments_count->approved;
+}
 
 /**
  * Total number of user that following this post
@@ -112,6 +116,7 @@ function _monit_prepare_post($post, $params) {
         'post_status' => $post['post_status'],
         'post_type' => get_post_type( $pid ),
         'custom_fields' => $wp_xmlrpc_server->get_custom_fields($pid),
+        'total_comments' => monit_post_total_comments($post),
     );
 }
 

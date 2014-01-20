@@ -50,7 +50,7 @@ function create_post_type_monitoramento() {
 		'menu_icon' => plugins_url( 'img/icone.png' , __FILE__ ),
 		'public' => true,
 		'has_archive' => true,
-		'rewrite' => array('with_front' => false, 'slug' => 'monitore/obra'),
+		'rewrite' => array('with_front' => false, 'slug' => 'deolho/obra'),
 		'description' => 'Obras do governo que serão monitoradas pelo cidadão',
 		'supports' => array('title','editor','author','thumbnail','thumbnail','excerpt',
 			                'trackbacks','custom-fields','comments','revisions','page-attributes',
