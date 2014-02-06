@@ -191,7 +191,7 @@ class gdMonitore {
 
 				$arvalues = "";
 
-				if ($content_type == "jpg" or $content_type == "png" or $content_type == "gif"){
+				if ($content_type == "jpg" or $content_type == "png" or $content_type == "gif" or $content_type == "jpeg"){
 					set_post_format($val, 'image' );
 					$arvalues = $this->gdobras_prefix.$this->imagem;
 				}
