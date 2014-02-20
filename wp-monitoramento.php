@@ -247,23 +247,26 @@ add_action('admin_init', 'wp_obras_register_meta_boxes' );
 # ------------------------------------------------------------------
 # Métodos utilizados para salvar as revisões dos dados nas revisões dos posts. \/ \/ \/
 
-function gdobras_publish_post( $post ) {
+function gdobras_publish_post( $new_status, $old_status, $post ) {
 
     $post_id = $post->ID;
 
-    if ( $post->post_type == 'gdobra' && get_post_format($post_id) == "status" ){
-        // Chama a url do GD que envia o aviso aos seguidores das obras que teve
-        // nova atualiação.
-        error_log("Chamando /sendnews para post ID ".$post->post_parent);
-        $base_url = get_option("gd_base_url");
-        $lines = file($base_url.'deolho/sendnews?obra='.$post->post_parent);
+    if ( $new_status != $old_status && $new_status == "publish" ){
+
+        if ( $post->post_type == 'gdobra' && get_post_format($post_id) == "status" ){
+            // Chama a url do GD que envia o aviso aos seguidores das obras que teve
+            // nova atualiação.
+            error_log("Chamando /sendnews para post ID ".$post->post_parent);
+            $base_url = get_option("gd_base_url");
+            $lines = file($base_url.'deolho/sendnews?obra='.$post->post_parent);
+        }
+
     }
 
 
 }
-add_action( 'pending_to_publish', 'gdobras_publish_post' );
-add_action( 'draft_to_publish', 'gdobras_publish_post' );
-// add_action( 'save_post', 'gdobras_save_post' );
+
+add_action( 'transition_post_status', 'gdobras_publish_post', 10, 3 );
 
 # -----
 

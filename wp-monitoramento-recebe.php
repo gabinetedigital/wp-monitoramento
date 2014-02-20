@@ -29,7 +29,7 @@ class gdMonitore {
 	var $statusPost			= 'publish';
 	var $postType	    	= 'gdobra';
 	var $gdobras_prefix 	= 'gdobra_';
-	var $gdTituloSituation 	= 'Governo Responde ';
+	var $gdTituloSituation 	= 'Governo Informa ';
 	var $porc_concluido 	= 'porc_concluido';
 	var $ini_efetivo    	= 'inicio_efetivo';
 	var $fim_previsto   	= 'fim_previsto';
