@@ -264,8 +264,6 @@ class gdMonitore {
 	function gdMonitoreMontaPost($post_id, $title, $content, $post_date, $post_parent){
 		$my_post = array(
 			'ID'			 => $post_id,
-			'post_title'     => $title,
-			'post_content'   => $content,
 			'post_type'	     => $this->postType,
 			'post_author'    => $this->gdMonitoreGetOption($this->userwp),
 			'post_parent'    => $post_parent,
@@ -273,6 +271,14 @@ class gdMonitore {
 			'post_date_gmt'  => date("Y-m-d H:i:s"),
 			'comment_status' => 'open'
 			);
+
+		if( ! empty($title) ){
+			$my_post['post_title'] = $title;
+		}
+		if( ! empty($content) ){
+			$my_post['post_content'] = $content;
+		}
+
 		if(empty($post_id)){
 			if(empty($post_parent)){
 				#uma obra sempre entra como 'pending'
@@ -392,7 +398,8 @@ foreach ($rs as $c){
 	//Verifica se já existe o post da obra
 	$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
 	if ($val) {
-		$my_post = $rsClasse->gdMonitoreMontaPost($val,$c->str_titulo_obra, $c->str_descricao_olho_obra, date('Y-m-d H:i:s'),NULL);
+		//Se a obra já existe no DONO, não atualiza mais seu título nem descrição.
+		$my_post = $rsClasse->gdMonitoreMontaPost($val,"", "", date('Y-m-d H:i:s'),NULL);
 		$post_id = $rsClasse->gdMonitoreUpdate($my_post);
 		$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao,
 															 $c->dat_inicio_real,
