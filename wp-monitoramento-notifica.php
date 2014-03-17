@@ -59,18 +59,32 @@ include '../../../wp-load.php';
 
 $mail_recipients = array("sergio.berlotto@gmail.com","sergio-berlotto@sgg.rs.gov.br");
 
-function calcula_data_r2($sdataR2){
-    $dias_intervalo = 32;
-    // $sdataR2 = "01/02/2014";
 
-    $dataR2 = DateTime::createFromFormat('Y-m-d', $sdataR2);
+function calcula_data_r2($sdataR2){
+    #Formato de
+    $dias_intervalo = 32;
+    // $sdataR2 = "2014-01-28";
+
+    // $dataR2 = DateTime::createFromFormat('Y-m-d', $sdataR2);
     // $dataR2 = DateTime::createFromFormat('d/m/Y', $sdataR2);
 
     $hoje = date_create();
 
-    $intervalo = date_diff($hoje, $dataR2);
-    $out = $intervalo->format("%Y Years, %M Months and %d Days");
-    $dias = $intervalo->y * 365.25 + $intervalo->m * 30 + $intervalo->d + $intervalo->h/24 + $intervalo->i / 60;
+    // $intervalo = date_diff($hoje, $dataR2);
+    // $out = $intervalo->format("%Y Years, %M Months and %d Days");
+    // $dias = $intervalo->y * 365.25 + $intervalo->m * 30 + $intervalo->d + $intervalo->h/24 + $intervalo->i / 60;
+
+    // Usa a função criada e pega o timestamp das duas datas:
+    $time_inicial = strtotime($sdataR2);
+    $time_final = strtotime($hoje->format('Y-m-d'));
+
+    // Calcula a diferença de segundos entre as duas datas:
+    $diferenca = $time_final - $time_inicial;
+
+    // Calcula a diferença de dias
+    $dias = (int)floor( $diferenca / (60 * 60 * 24));
+
+    // echo "<br>$dias dias de diferenca";
 
     $resto = $dias % $dias_intervalo;
 
@@ -181,7 +195,7 @@ foreach($obras as $obra){
 
         }
         echo "</td><td>$obra->title</td><td>", $pdate->format("Y-m-d"), "</td>";
-        echo "<td>",$data['penultima']->format('Y/m/d'),"</td><td>",$data['anterior']->format('Y/m/d'),"</td><td>",$data['proxima']->format('Y/m/d'),"</td></tr>";
+        echo "<td>",$data['penultima']->format('Y-m-d'),"</td><td>",$data['anterior']->format('Y-m-d'),"</td><td>",$data['proxima']->format('Y-m-d'),"</td></tr>";
     }
 }
 wp_reset_query();
