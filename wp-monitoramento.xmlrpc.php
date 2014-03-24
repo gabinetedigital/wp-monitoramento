@@ -372,7 +372,7 @@ function monitoramento_getUltimaRespostaGovObra($args){
 
         $querystr = "
             select * from wp_posts
-            where ID in (
+            where ID = (
                 select max(ID) #, post_title, p.post_parent, format.name formato
                 from wp_posts p, wp_term_relationships r,
                    (select t.name, tt.term_taxonomy_id from wp_term_taxonomy tt, wp_terms t where t.term_id = tt.term_id and tt.taxonomy = 'post_format') format
