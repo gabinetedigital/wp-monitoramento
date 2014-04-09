@@ -19,6 +19,7 @@
  * related information. This is an attempt to improve the modularization
  * of this plugin.
  */
+set_time_limit(0);
 header('Content-Type:text/html; charset=utf-8');
 include '../../../wp-load.php';
 
@@ -60,10 +61,15 @@ class gdMonitore {
 	public function gdMonitoreMontaUrl(){
 
 		$timestmp  = time();
-		$apiKey     = $this->gdMonitoreGetOption('gd_gdobra_apikey');
-		$PrivateKey = $this->gdMonitoreGetOption('gd_gdobra_privatekey');
-		$parturl    = $this->gdMonitoreGetOption('gd_gdobra_parturl');
-		$url 		= $this->gdMonitoreGetOption('gd_gdobra_url');
+		//$apiKey     = $this->gdMonitoreGetOption('gd_gdobra_apikey');
+		//$PrivateKey = $this->gdMonitoreGetOption('gd_gdobra_privatekey');
+		//$parturl    = $this->gdMonitoreGetOption('gd_gdobra_parturl');
+		//$url 		= $this->gdMonitoreGetOption('gd_gdobra_url');
+		
+		$apiKey     = "gabinete.digital";
+		$PrivateKey = "24a60eeecc1f87700fac57df4911eaf220dd7f682b755ce8c9dca78954420546273f797e35ef2ce9473c112353ccfec5a13f7e708e379350142d1f29efc3ec3c";
+		$parturl    = "/sme/obras/list.json?";
+		$url 	    = "http://www.sme.rs.gov.br";	
 
 		$call = 'GET '.$parturl."apiKey=".$apiKey."&timestamp=".$timestmp;
 		$Signature = hash_hmac('sha256', $call, $PrivateKey);
@@ -382,25 +388,42 @@ class gdMonitore {
 
 		return $my_post;
 	}
+function gdMonitoreLog($txt){
+    	$arquivo = $_SERVER['DOCUMENT_ROOT']."/wp/wp-content/uploads/logSME.txt"; 
+    	$fp = fopen($arquivo, "a");
+		$txt = date('d/m/Y H:i:s')." - ".$txt."\n";
+		$escreve = fwrite($fp, $txt);
+		fclose($fp);
+    }
+
 }
 
+
 $rsClasse = new gdMonitore();
+$rsClasse->gdMonitoreLog("LOG INICIAL");
+
 try{
 	$url = $rsClasse->gdMonitoreMontaUrl();
+$rsClasse->gdMonitoreLog("URL = ".$url);
 	$rs = $rsClasse->gdMonitoreChamada($url);
+$rsClasse->gdMonitoreLog("RS = ".$rs);
 } catch (Exception $e){
 	echo $e->getMessage();
 
 }
 
 foreach ($rs as $c){
-
-	//Verifica se já existe o post da obra
+	//Verifica se j existe o post da obra
 	$val = $rsClasse->gdMonitoreVerificaCodigoPk($c->num_codigo_pk);
+$rsClasse->gdMonitoreLog("codpk = ".$c->num_codigo_pk);
+$rsClasse->gdMonitoreLog("VAL = ".$val);
 	if ($val) {
-		//Se a obra já existe no DONO, não atualiza mais seu título nem descrição.
+$rsClasse->gdMonitoreLog("VAL EXISTE");
+		//Se a obra j existe no DONO, no atualiza mais seu ttulo nem descrio.
 		$my_post = $rsClasse->gdMonitoreMontaPost($val,"", "", date('Y-m-d H:i:s'),NULL);
+$rsClasse->gdMonitoreLog("MYPOST = ".$my_post);
 		$post_id = $rsClasse->gdMonitoreUpdate($my_post);
+$rsClasse->gdMonitoreLog("POSTID= ".$post_id);
 		$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao,
 															 $c->dat_inicio_real,
 															 $c->dat_termino_prevista,
@@ -411,16 +434,23 @@ foreach ($rs as $c){
 															 $c->customFields,
 															 $c->cities,
 															 $c->num_codigo_pk);
+$rsClasse->gdMonitoreLog("MYVALUES = ".$myvalues);
 		$rsClasse->gdMonitoreUpdateCustomField($post_id, $myvalues);
+$rsClasse->gdMonitoreLog("Custom Fields");
 		$post_Situation = $rsClasse->gdMonitoreUpdateSituation($val, $c->publicSituation);
+$rsClasse->gdMonitoreLog("POSTSITUATION = ".$post_Situation);
 		if ($post_Situation){
 				$rsClasse->gdMonitoreUpdateEvidences($val, $c->evidences);
+				$rsClasse->gdMonitoreLog("EVIDENCES = ".$c->evidences);
 			}
 
 		echo "<br>Atualizado com Sucesso<br>";
 	} else {
+$rsClasse->gdMonitoreLog("NO TEM VAL");
 		$my_post = $rsClasse->gdMonitoreMontaPost(NULL,$c->str_titulo_obra, $c->str_descricao_olho_obra, date('Y-m-d H:i:s'),NULL);
+$rsClasse->gdMonitoreLog("MYPOST = ".$my_post);
 		$post_id = $rsClasse->gdMonitoreInsert($my_post);
+$rsClasse->gdMonitoreLog("POSTID = ".$post_id);
 
 		if ($post_id){
 			$myvalues = $rsClasse->gdMonitoreMontaCamposCustom($c->num_percentual_execucao,
@@ -433,16 +463,21 @@ foreach ($rs as $c){
 															 $c->customFields,
 															 $c->cities,
 															 $c->num_codigo_pk);
+$rsClasse->gdMonitoreLog("MYVALUES = ".$myvalues);
 
 			$rsClasse->gdMonitoreInsertCustomField($post_id, $myvalues);
+$rsClasse->gdMonitoreLog("Custom Fields");
 			$post_Situation = $rsClasse->gdMonitoreInsertSituation($post_id, $c->publicSituation);
+$rsClasse->gdMonitoreLog("POSTSITUATION = ".$post_Situation);
 			if ($post_Situation){
 				$rsClasse->gdMonitoreInsertEvidences($post_id, $c->evidences);
+$rsClasse->gdMonitoreLog("EVIDENCES = ".$c->evidences);
 			}
 
 		}
 		echo "<br>Inserido com Sucesso<br>";
 		}
 
+$rsClasse->gdMonitoreLog("LOG FINAL");
 }
 ?>
