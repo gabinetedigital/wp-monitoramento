@@ -65,11 +65,11 @@ class gdMonitore {
 		//$PrivateKey = $this->gdMonitoreGetOption('gd_gdobra_privatekey');
 		//$parturl    = $this->gdMonitoreGetOption('gd_gdobra_parturl');
 		//$url 		= $this->gdMonitoreGetOption('gd_gdobra_url');
-		
-		$apiKey     = "gabinete.digital";
-		$PrivateKey = "24a60eeecc1f87700fac57df4911eaf220dd7f682b755ce8c9dca78954420546273f797e35ef2ce9473c112353ccfec5a13f7e708e379350142d1f29efc3ec3c";
-		$parturl    = "/sme/obras/list.json?";
-		$url 	    = "http://www.sme.rs.gov.br";	
+		//Alterar e colocar os dados corretos.
+		$apiKey     = "VERIFICAR";
+		$PrivateKey = "VERIFICAR";
+		$parturl    = "VERIFICAR";
+		$url 	    = "VERIFICAR";	
 
 		$call = 'GET '.$parturl."apiKey=".$apiKey."&timestamp=".$timestmp;
 		$Signature = hash_hmac('sha256', $call, $PrivateKey);
