@@ -127,7 +127,7 @@ function monitoramento_getObra($args) {
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
+    error_log(' ======================================== monitoramento_getObra ARGS ======================================== ');
     error_log(print_r($args, True));
 
     $post_type = "gdobra"; #$args[1];
@@ -194,7 +194,7 @@ function monitoramento_getObras($args) {
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
+    error_log(' ======================================== monitoramento_getObras ARGS ======================================== ');
     error_log(print_r($args, True));
 
     $post_type = "gdobra"; #$args[1];
@@ -239,19 +239,21 @@ function monitoramento_getObraTimeline($args) {
     if (!isset($args[1]))
         return null;
 
-    error_log(' ======================================== ARGS ======================================== ');
+    error_log(' ======================================== monitoramento_getObraTimeline ARGS ======================================== ');
     error_log(print_r($args, True));
 
     $post_type = "gdobra";
     $the_parent = $args[1];
 
     // Utilizado get_pages ao invés de get_posts pois get_pages retorna a arvore correta dos posts conforme hierarquia.
+    error_log(' ======================================== CONSULTA A OBRA TIMELINE ======================================== ');
     if (isset($args[2])){
         $theid = $args[2];
-        $my_posts = get_pages("include=$theid&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=desc");
+        $my_posts = get_pages("include=$theid&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=asc");
     }else{
-        $my_posts = get_pages("child_of=$the_parent&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=desc");
+        $my_posts = get_pages("child_of=$the_parent&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=asc");
     }
+    error_log(' ====================================== CONSULTA A OBRA TIMELINE FIM ====================================== ');
 
     error_log( print_r( (array)$my_posts[0], True) );
     if( $my_posts ) {

@@ -163,6 +163,7 @@ $obras = $wpdb->get_results($sql);
 $obra_atrasada_subject = get_option("gd_obra_atrasada_subject");
 $obra_atrasada_msg = get_option("gd_obra_atrasada_msg");
 $baseurl = get_option("gd_base_url");
+$headers = 'From: De Olho nas Obras <gabinetedigital@sgg.rs.gov.br>' . "\r\n";
 
 foreach($obras as $obra){
     $pdate = new DateTime($obra->post_date);
@@ -187,8 +188,15 @@ foreach($obras as $obra){
                 echo " <span class='warning'>[ATRASADA]</span>";
                 $to = get_post_custom_values("gdobra_atrasada_emails1", $obra->parent_id);
                 if( $to != null ){
-                    echo "<br><span>Emails para: $to[0]</span>";
-                    wp_mail( $to, $obra_atrasada_subject, sprintf($obra_atrasada_msg, $obra->title, $url) );
+
+                    // Set destination address(es)
+                    // Accept either a comma-separated list or an array
+                    $to = explode( ',', implode( ',', (array) $to ) );
+                    foreach ( $to as $to_recipient ) {
+                        echo "<br><span>Emails para: $to_recipient</span>";
+                        wp_mail( $to_recipient, $obra_atrasada_subject, sprintf($obra_atrasada_msg, $obra->title, $url), $headers );
+                    }
+
                 }
 
             }
