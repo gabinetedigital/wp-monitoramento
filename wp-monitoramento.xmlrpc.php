@@ -188,6 +188,8 @@ function monitoramento_getObraById($args) {
 }
 
 function monitoramento_getObras($args) {
+
+    global $wpdb;
     #
     # Retorna a lista completa dos posts(gdobra)
     #
@@ -209,7 +211,57 @@ function monitoramento_getObras($args) {
       'post_parent'     => 0, # -> Somente os posts PAI
       'numberposts' => -1
     );
-    $my_posts = get_posts($query);
+
+    //Ordenação: andamento, valorglobal, atualizacao, previsaoconclusao
+    $filtros = $args[1];
+    $filtro = $filtros['filtro'];
+    $valor  = $filtros['valor'];
+    $ordem  = $filtros['ordem'];
+
+
+    if( $ordem == 'atualizacao' ){
+        error_log("ordenando por ATUALIZACAO");
+        //Ordenando por Status do Governo mais Atual:
+        $querystr = "
+        select p.* from wp_posts p,
+        (
+          select p.ID, MAX(p.post_modified) date_modified, post_title, p.post_parent, format.name formato
+          from wp_posts p, wp_term_relationships r,
+             (select t.name, tt.term_taxonomy_id from wp_term_taxonomy tt, wp_terms t where t.term_id = tt.term_id and tt.taxonomy = 'post_format') format
+          where p.id = r.object_id
+          and r.term_taxonomy_id = format.term_taxonomy_id
+          and p.post_type = 'gdobra'
+          and p.post_status = 'publish'
+          and format.name = 'post-format-status'
+          group by p.post_parent
+        ) f
+        where p.post_parent = 0
+        and p.post_type = 'gdobra'
+        and p.ID = f.post_parent
+        order by f.date_modified DESC";
+
+        error_log($querystr);
+        $my_posts = $wpdb->get_results($querystr, OBJECT);
+
+    }else{
+        if($ordem == 'andamento'){
+            error_log("ordenando por ANDAMENTO");
+            $query['meta_key'] = 'gdobra_porc_concluido';
+            $query['orderby'] = 'meta_value_num DESC';
+        }
+        if($ordem == 'valorglobal'){
+            error_log("ordenando por VALOR GLOBAL");
+            $query['meta_key'] = 'gdobra_valor_global';
+            $query['orderby'] = 'meta_value_num DESC';
+        }
+        if($ordem == 'previsaoconclusao'){
+            error_log("ordenando por FIM PREVISTO");
+            $query['meta_key'] = 'gdobra_fim_previsto';
+            $query['orderby'] = 'meta_value DESC';
+        }
+        $my_posts = get_posts($query);
+    }
+
 
     error_log( print_r( (array)$my_posts[0], True) );
     if( $my_posts ) {
