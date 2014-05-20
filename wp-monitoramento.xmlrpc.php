@@ -127,8 +127,8 @@ function monitoramento_getObra($args) {
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== monitoramento_getObra ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== monitoramento_getObra ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     $post_type = "gdobra"; #$args[1];
 
@@ -136,7 +136,7 @@ function monitoramento_getObra($args) {
         return null;
 
     $the_slug = $args[1];
-    error_log($the_slug);
+    // error_log($the_slug);
 
     $query=array(
       'name' => $the_slug,
@@ -146,10 +146,10 @@ function monitoramento_getObra($args) {
     );
     $my_posts = get_posts($query);
 
-    error_log( print_r( (array)$my_posts[0], True) );
-    if( $my_posts ) {
-        error_log( 'ID on the first post found '.$my_posts[0]->ID );
-    }
+    // error_log( print_r( (array)$my_posts[0], True) );
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    // }
 
     $post = _monit_prepare_post( (array)$my_posts[0], $args);
     // return $my_posts[0];
@@ -163,8 +163,8 @@ function monitoramento_getObraById($args) {
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     $post_type = "gdobra"; #$args[1];
 
@@ -172,15 +172,15 @@ function monitoramento_getObraById($args) {
         return null;
 
     $the_id = $args[1];
-    error_log($the_id);
+    // error_log($the_id);
 
     $query="include=$the_id&post_type=$post_type&post_status=publish&numberposts=1";
     $my_posts = get_posts($query);
 
-    error_log( print_r( (array)$my_posts[0], True) );
-    if( $my_posts ) {
-        error_log( 'ID on the first post found monitoramento_getObraById '.$my_posts[0]->ID );
-    }
+    // error_log( print_r( (array)$my_posts[0], True) );
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found monitoramento_getObraById '.$my_posts[0]->ID );
+    // }
 
     $post = _monit_prepare_post( (array)$my_posts[0], $args);
     // return $my_posts[0];
@@ -196,8 +196,8 @@ function monitoramento_getObras($args) {
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== monitoramento_getObras ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== monitoramento_getObras ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     $post_type = "gdobra"; #$args[1];
 
@@ -220,7 +220,7 @@ function monitoramento_getObras($args) {
 
 
     if( $ordem == 'atualizacao' ){
-        error_log("ordenando por ATUALIZACAO");
+        // error_log("ordenando por ATUALIZACAO");
         //Ordenando por Status do Governo mais Atual:
         $querystr = "
         select p.* from wp_posts p,
@@ -240,22 +240,22 @@ function monitoramento_getObras($args) {
         and p.ID = f.post_parent
         order by f.date_modified DESC";
 
-        error_log($querystr);
+        // error_log($querystr);
         $my_posts = $wpdb->get_results($querystr, OBJECT);
 
     }else{
         if($ordem == 'andamento'){
-            error_log("ordenando por ANDAMENTO");
+            // error_log("ordenando por ANDAMENTO");
             $query['meta_key'] = 'gdobra_porc_concluido';
             $query['orderby'] = 'meta_value_num DESC';
         }
         if($ordem == 'valorglobal'){
-            error_log("ordenando por VALOR GLOBAL");
+            // error_log("ordenando por VALOR GLOBAL");
             $query['meta_key'] = 'gdobra_valor_global';
             $query['orderby'] = 'meta_value_num DESC';
         }
         if($ordem == 'previsaoconclusao'){
-            error_log("ordenando por FIM PREVISTO");
+            // error_log("ordenando por FIM PREVISTO");
             $query['meta_key'] = 'gdobra_fim_previsto';
             $query['orderby'] = 'meta_value DESC';
         }
@@ -263,10 +263,10 @@ function monitoramento_getObras($args) {
     }
 
 
-    error_log( print_r( (array)$my_posts[0], True) );
-    if( $my_posts ) {
-        error_log( 'ID on the first post found '.$my_posts[0]->ID );
-    }
+    // error_log( print_r( (array)$my_posts[0], True) );
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    // }
 
     // Handling posts found
     $obras = array( );
@@ -291,26 +291,26 @@ function monitoramento_getObraTimeline($args) {
     if (!isset($args[1]))
         return null;
 
-    error_log(' ======================================== monitoramento_getObraTimeline ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== monitoramento_getObraTimeline ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     $post_type = "gdobra";
     $the_parent = $args[1];
 
     // Utilizado get_pages ao invés de get_posts pois get_pages retorna a arvore correta dos posts conforme hierarquia.
-    error_log(' ======================================== CONSULTA A OBRA TIMELINE ======================================== ');
+    // error_log(' ======================================== CONSULTA A OBRA TIMELINE ======================================== ');
     if (isset($args[2])){
         $theid = $args[2];
         $my_posts = get_pages("include=$theid&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=asc");
     }else{
         $my_posts = get_pages("child_of=$the_parent&post_type=$post_type&post_status=publish&sort_column=post_date&sort_order=asc");
     }
-    error_log(' ====================================== CONSULTA A OBRA TIMELINE FIM ====================================== ');
+    // error_log(' ====================================== CONSULTA A OBRA TIMELINE FIM ====================================== ');
 
-    error_log( print_r( (array)$my_posts[0], True) );
-    if( $my_posts ) {
-        error_log( 'ID on the first post found '.$my_posts[0]->ID );
-    }
+    // error_log( print_r( (array)$my_posts[0], True) );
+    // if( $my_posts ) {
+    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
+    // }
 
     // Handling posts found
     $struct = array( );
@@ -327,8 +327,8 @@ function monitoramento_getObraStatsFilhos($args){
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     if (isset($args[1])){
         // Conta todos os filhos de uma obra.
@@ -369,8 +369,8 @@ function monitoramento_getObraStatsVotos($args){
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     if (isset($args[1])){
         // Conta todos os filhos de uma obra.
@@ -397,7 +397,7 @@ function monitoramento_getObraStatsVotos($args){
             ";
     }
 
-    error_log($querystr);
+    // error_log($querystr);
     $pageposts = $wpdb->get_results($querystr, OBJECT);
     // error_log( print_r( $pageposts, True) );
 
@@ -417,8 +417,8 @@ function monitoramento_getUltimaRespostaGovObra($args){
     if (!is_array($args = _monit_method_header($args)))
         return $args;
 
-    error_log(' ======================================== ARGS ======================================== ');
-    error_log(print_r($args, True));
+    // error_log(' ======================================== ARGS ======================================== ');
+    // error_log(print_r($args, True));
 
     if (isset($args[1])){
         // Conta todos os filhos de uma obra.
