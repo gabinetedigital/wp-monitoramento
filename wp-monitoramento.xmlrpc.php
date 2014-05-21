@@ -452,6 +452,39 @@ function monitoramento_getUltimaRespostaGovObra($args){
 }
 
 
+function monitoramento_getCidadesDasObras($args){
+
+    global $wpdb;
+    $querystr = "
+        select meta_value
+        from wp_postmeta
+        where post_id in (
+            select ID from wp_posts
+            where post_type = 'gdobra'
+            and post_status = 'publish'
+            and post_parent = 0
+        )
+        and meta_key = 'gdobra_municipio'
+    ";
+    $cidades = $wpdb->get_results($querystr, OBJECT);
+    return $cidades;
+
+}
+
+
+function monitoramento_getSecretarias($args){
+    global $wpdb;
+
+    $querystr = "
+        select distinct t.term_id id, t.name secretaria
+        from wp_term_taxonomy tt, wp_terms t
+        where tt.taxonomy = 'tema' and tt.term_id = t.term_id
+    ";
+    $secretarias = $wpdb->get_results($querystr, OBJECT);
+    return $secretarias;
+
+}
+
 add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObras'] = 'monitoramento_getObras';
     $methods['monitoramento.getObra'] = 'monitoramento_getObra';
@@ -460,6 +493,8 @@ add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObraStatsFilhos'] = 'monitoramento_getObraStatsFilhos';
     $methods['monitoramento.getObraStatsVotos'] = 'monitoramento_getObraStatsVotos';
     $methods['monitoramento.getUltimaRespostaGovObra'] = 'monitoramento_getUltimaRespostaGovObra';
+    $methods['monitoramento.getCidadesDasObras'] = 'monitoramento_getCidadesDasObras';
+    $methods['monitoramento.getSecretarias'] = 'monitoramento_getSecretarias';
     return $methods;
 });
 
