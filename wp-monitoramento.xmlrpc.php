@@ -259,7 +259,33 @@ function monitoramento_getObras($args) {
             $query['meta_key'] = 'gdobra_fim_previsto';
             $query['orderby'] = 'meta_value DESC';
         }
+
+        if($filtro != ""){
+            switch( $filtro ){
+                case "secretaria":
+                    $query['tax_query'] = array(
+                        array(
+                            'taxonomy' => 'tema',
+                            // 'field' => 'slug',
+                            'terms' => intval($valor)
+                        )
+                    );
+                break;
+                case "municipio":
+                    $query['meta_query'] = array(
+                        array(
+                            'key' => 'gdobra_municipio',
+                            'value' => $valor,
+                            'compare' => 'LIKE'
+                        )
+                    );
+                break;
+            }
+        }
+
         $my_posts = get_posts($query);
+
+        // error_log( print_r($wpdb->queries,true) );
     }
 
 
@@ -476,7 +502,7 @@ function monitoramento_getSecretarias($args){
     global $wpdb;
 
     $querystr = "
-        select distinct t.term_id id, t.name secretaria
+        select distinct t.term_id id, t.name secretaria, t.slug
         from wp_term_taxonomy tt, wp_terms t
         where tt.taxonomy = 'tema' and tt.term_id = t.term_id
     ";
