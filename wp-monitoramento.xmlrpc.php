@@ -280,6 +280,15 @@ function monitoramento_getObras($args) {
                         )
                     );
                 break;
+                case "regiao":
+                    $query['meta_query'] = array(
+                        array(
+                            'key' => 'gdobra_regiao',
+                            'value' => $valor
+                            // 'compare' => 'LIKE'
+                        )
+                    );
+                break;
             }
         }
 
