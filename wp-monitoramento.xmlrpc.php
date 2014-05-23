@@ -219,89 +219,61 @@ function monitoramento_getObras($args) {
     $ordem  = $filtros['ordem'];
 
 
-    if( $ordem == 'atualizacao' ){
-        // error_log("ordenando por ATUALIZACAO");
-        //Ordenando por Status do Governo mais Atual:
-        $querystr = "
-        select p.* from wp_posts p,
-        (
-          select p.ID, MAX(p.post_modified) date_modified, post_title, p.post_parent, format.name formato
-          from wp_posts p, wp_term_relationships r,
-             (select t.name, tt.term_taxonomy_id from wp_term_taxonomy tt, wp_terms t where t.term_id = tt.term_id and tt.taxonomy = 'post_format') format
-          where p.id = r.object_id
-          and r.term_taxonomy_id = format.term_taxonomy_id
-          and p.post_type = 'gdobra'
-          and p.post_status = 'publish'
-          and format.name = 'post-format-status'
-          group by p.post_parent
-        ) f
-        where p.post_parent = 0
-        and p.post_type = 'gdobra'
-        and p.ID = f.post_parent
-        order by f.date_modified DESC";
-
-        // error_log($querystr);
-        $my_posts = $wpdb->get_results($querystr, OBJECT);
-
-    }else{
-        if($ordem == 'andamento'){
-            // error_log("ordenando por ANDAMENTO");
-            $query['meta_key'] = 'gdobra_porc_concluido';
-            $query['orderby'] = 'meta_value_num DESC';
-        }
-        if($ordem == 'valorglobal'){
-            // error_log("ordenando por VALOR GLOBAL");
-            $query['meta_key'] = 'gdobra_valor_global';
-            $query['orderby'] = 'meta_value_num DESC';
-        }
-        if($ordem == 'previsaoconclusao'){
-            // error_log("ordenando por FIM PREVISTO");
-            $query['meta_key'] = 'gdobra_fim_previsto';
-            $query['orderby'] = 'meta_value DESC';
-        }
-
-        if($filtro != ""){
-            switch( $filtro ){
-                case "secretaria":
-                    $query['tax_query'] = array(
-                        array(
-                            'taxonomy' => 'tema',
-                            // 'field' => 'slug',
-                            'terms' => intval($valor)
-                        )
-                    );
-                break;
-                case "municipio":
-                    $query['meta_query'] = array(
-                        array(
-                            'key' => 'gdobra_municipio',
-                            'value' => $valor,
-                            'compare' => 'LIKE'
-                        )
-                    );
-                break;
-                case "regiao":
-                    $query['meta_query'] = array(
-                        array(
-                            'key' => 'gdobra_regiao',
-                            'value' => $valor
-                            // 'compare' => 'LIKE'
-                        )
-                    );
-                break;
-            }
-        }
-
-        $my_posts = get_posts($query);
-
-        // error_log( print_r($wpdb->queries,true) );
+    if($ordem == 'atualizacao'){
+        // gdobra_last_child_update: Este campo é salvo na OBRA qdo qq
+        // post do tipo "gdobra" é salvo e é um filho.
+        $query['meta_key'] = 'gdobra_last_child_update';
+        $query['orderby'] = 'meta_value DESC';
+    }
+    if($ordem == 'andamento'){
+        // error_log("ordenando por ANDAMENTO");
+        $query['meta_key'] = 'gdobra_porc_concluido';
+        $query['orderby'] = 'meta_value_num DESC';
+    }
+    if($ordem == 'valorglobal'){
+        // error_log("ordenando por VALOR GLOBAL");
+        $query['meta_key'] = 'gdobra_valor_global';
+        $query['orderby'] = 'meta_value_num DESC';
+    }
+    if($ordem == 'previsaoconclusao'){
+        // error_log("ordenando por FIM PREVISTO");
+        $query['meta_key'] = 'gdobra_fim_previsto';
+        $query['orderby'] = 'meta_value DESC';
     }
 
+    if($filtro != ""){
+        switch( $filtro ){
+            case "secretaria":
+                $query['tax_query'] = array(
+                    array(
+                        'taxonomy' => 'tema',
+                        // 'field' => 'slug',
+                        'terms' => intval($valor)
+                    )
+                );
+            break;
+            case "municipio":
+                $query['meta_query'] = array(
+                    array(
+                        'key' => 'gdobra_municipio',
+                        'value' => $valor,
+                        'compare' => 'LIKE'
+                    )
+                );
+            break;
+            case "regiao":
+                $query['meta_query'] = array(
+                    array(
+                        'key' => 'gdobra_regiao',
+                        'value' => $valor
+                        // 'compare' => 'LIKE'
+                    )
+                );
+            break;
+        }
+    }
 
-    // error_log( print_r( (array)$my_posts[0], True) );
-    // if( $my_posts ) {
-    //     error_log( 'ID on the first post found '.$my_posts[0]->ID );
-    // }
+    $my_posts = get_posts($query);
 
     // Handling posts found
     $obras = array( );

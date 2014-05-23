@@ -404,4 +404,26 @@ function gdobra_tema_taxonomy()  {
 // Hook into the 'init' action
 add_action( 'init', 'gdobra_tema_taxonomy', 0 );
 
+// Hook to save the last update in childs of "gdobra"
+function gdobra_save_update_children( $post_id ) {
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+        return;
+
+    if ( !wp_is_post_revision( $post_id )
+    && 'gdobra' == get_post_type( $post_id )
+    && 'auto-draft' != get_post_status( $post_id ) ) {
+        $obra = get_post( $post_id );
+        if( 0 != $obra->post_parent ){
+            $parents =& get_post_ancestors( $post_id );
+            if( !empty( $parents ) ){
+                //Salva a data de AGORA no custom_field do pai (a obra)
+                $pai_id = end($parents);
+                $date = date('Y-m-d H:i:s', time());
+                update_post_meta($pai_id, "gdobra_last_child_update", $date);
+            }
+        }
+    }
+}
+add_action( 'save_post', 'gdobra_save_update_children' );
+
 ?>
