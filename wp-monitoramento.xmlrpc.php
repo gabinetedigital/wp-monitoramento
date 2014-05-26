@@ -492,6 +492,21 @@ function monitoramento_getSecretarias($args){
 
 }
 
+function monitoramento_getTotalObras($args){
+    global $wpdb;
+
+    $querystr = "
+        select count(1) total
+        from wp_posts p
+        where p.post_type = 'gdobra'
+        and p.post_status = 'publish'
+        and p.post_parent = 0
+    ";
+    $total_obras = $wpdb->get_results($querystr, OBJECT);
+    return $total_obras;
+
+}
+
 add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getObras'] = 'monitoramento_getObras';
     $methods['monitoramento.getObra'] = 'monitoramento_getObra';
@@ -502,6 +517,7 @@ add_filter('xmlrpc_methods', function ($methods) {
     $methods['monitoramento.getUltimaRespostaGovObra'] = 'monitoramento_getUltimaRespostaGovObra';
     $methods['monitoramento.getCidadesDasObras'] = 'monitoramento_getCidadesDasObras';
     $methods['monitoramento.getSecretarias'] = 'monitoramento_getSecretarias';
+    $methods['monitoramento.getTotalObras'] = 'monitoramento_getTotalObras';
     return $methods;
 });
 
