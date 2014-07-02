@@ -67,15 +67,73 @@ add_action( 'init', 'create_post_type_monitoramento' );
 
 function fws_admin_posts_filter( $query ) {
     global $pagenow;
-    if ( is_admin() && $pagenow == 'edit.php' && !empty($_GET['my_parent_pages'])) {
-        if( $_GET['my_parent_pages'] == 'only_top'){
-        	$query->query_vars['post_parent'] = '0';
+    global $wpdb;
+    if ( is_admin() && $pagenow == 'edit.php') {
+        if( !empty($_GET['my_parent_pages']) ){
+            if( $_GET['my_parent_pages'] == 'only_top'){
+            	$query->query_vars['post_parent'] = '0';
+            }else{
+                $children = get_pages('post_type=gdobra&child_of='.$_GET['my_parent_pages']);
+                // error_log("CHILDREN --------------------------- of:".$_GET['my_parent_pages']);
+                // error_log( print_r($children, True));
+                $postids = array($_GET['my_parent_pages']);
+                foreach( $children as $child ){
+                    // error_log("CHILD ID:".$child->ID);
+                    $postids[count($postids)] = $child->ID;
+                }
+
+            	// $query->query_vars['post_parent'] = $_GET['my_parent_pages'];
+
+                $query->query_vars['post__in'] = $postids;
+            }
         }else{
-        	$query->query_vars['post_parent'] = $_GET['my_parent_pages'];
+            //Default é listar somente as obras
+            $query->query_vars['post_parent'] = '0';
         }
     }
+    // error_log("----------------------- SQL FILTRADO -----------------------------");
+    // error_log( print_r($query, True) );
+    // error_log("----------------------- SQL FILTRADO -----------------------------");
 }
 add_filter( 'parse_query', 'fws_admin_posts_filter' );
+
+
+add_filter( 'manage_edit-gdobra_columns', 'set_custom_edit_book_columns' );
+add_action( 'manage_gdobra_posts_custom_column' , 'custom_book_column', 10, 2 );
+
+function set_custom_edit_book_columns($columns) {
+    unset( $columns['author'] );
+    $columns['obra_andamento'] = __( 'Andamento', 'your_text_domain' );
+    $columns['obra_icon'] = __( 'Ver Filhos', 'your_text_domain' );
+
+    return $columns;
+}
+
+function custom_book_column( $column, $post_id ) {
+
+    $parents = get_post_ancestors( $post_id );
+    $idparent = ($parents) ? $parents[count($parents)-1]: 0;
+
+    switch ( $column ) {
+        case 'obra_andamento' :
+            $andamento = get_post_meta( $post_id, "gdobra_porc_concluido", True );
+            if ( is_string( $andamento ) && !empty($andamento) )
+                echo "$andamento %";
+            else
+                echo( '-x-' );
+            break;
+
+        case 'obra_icon' :
+            if( $idparent == 0 ){
+                $post_url = admin_url( "edit.php?post_type=gdobra&my_parent_pages=$post_id" ) ;
+                echo "<br><a class='button-secondary' href='$post_url'>Ver filhos</a>";
+            }else{
+                echo "-x-";
+            }
+            break;
+
+    }
+}
 
 function admin_page_filter_parentpages() {
     global $wpdb;
@@ -90,7 +148,7 @@ function admin_page_filter_parentpages() {
 		$selpais = "only_top" == $current ? ' selected="selected"' : '';
 		$select = '
 			<select name="my_parent_pages">
-				<option value="">- Ver todas as obras -</option>
+				<option value="">- Lista inicial -</option>
 				<option value="only_top" '.$selpais.'>- Ver somente as obras pai -</option>';
 		foreach ($parent_pages as $page) {
 			$select .= sprintf('
@@ -293,7 +351,7 @@ function gdobras_publish_post( $new_status, $old_status, $post ) {
         if ( $post->post_type == 'gdobra' && get_post_format($post_id) == "status" ){
             // Chama a url do GD que envia o aviso aos seguidores das obras que teve
             // nova atualiação.
-            error_log("Chamando /sendnews para post ID ".$post->post_parent);
+            // error_log("Chamando /sendnews para post ID ".$post->post_parent);
             $base_url = get_option("gd_base_url");
             $lines = file($base_url.'deolho/sendnews?obra='.$post->post_parent);
         }
@@ -317,7 +375,7 @@ function gdobras_restore_revision( $post_id, $revision_id ) {
 		if(!array_key_exists( 'nohistory', $cf )){
 			$meta_name = $cf['id'];
 			$my_meta  = get_metadata( 'post', $revision->ID, $meta_name, true );
-			error_log("RESTORING:".$cf['id']."=".$my_meta);
+			// error_log("RESTORING:".$cf['id']."=".$my_meta);
 			if ( $my_meta != Null )
 				update_post_meta( $post_id, $meta_name, $my_meta );
 			else
@@ -337,7 +395,7 @@ function gdobras_revision_fields( $fields ) {
 
 	foreach ($gd_obras_custom_fields as $cf) {
 		if(!array_key_exists( 'nohistory', $cf )){
-			error_log("VIEWING:".$cf['id']);
+			// error_log("VIEWING:".$cf['id']);
 			$fields[$cf['id']] = $cf['name'];
 		}
 	}
@@ -351,7 +409,7 @@ add_filter( '_wp_post_revision_fields', 'gdobras_revision_fields' );
 function gdobras_revision_field( $value, $field ) {
 
 	global $revision;
-	error_log("GETTING:".$field);
+	// error_log("GETTING:".$field);
 	return get_metadata( 'post', $revision->ID, $field, true );
 
 }
