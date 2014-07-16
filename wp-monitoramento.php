@@ -68,7 +68,8 @@ add_action( 'init', 'create_post_type_monitoramento' );
 function fws_admin_posts_filter( $query ) {
     global $pagenow;
     global $wpdb;
-    if ( is_admin() && $pagenow == 'edit.php') {
+    if ( is_admin() && $pagenow == 'edit.php' &&
+    	 $query->query_vars['post_type'] == 'gdobra' ) {
         if( !empty($_GET['my_parent_pages']) ){
             if( $_GET['my_parent_pages'] == 'only_top'){
             	$query->query_vars['post_parent'] = '0';
@@ -128,7 +129,13 @@ function custom_book_column( $column, $post_id ) {
                 $post_url = admin_url( "edit.php?post_type=gdobra&my_parent_pages=$post_id" ) ;
                 echo "<br><a class='button-secondary' href='$post_url'>Ver filhos</a>";
             }else{
-                echo "-x-";
+                if( count($parents) == 1 ){
+                    echo "GOV INFORMA";
+                }elseif( count($parents) > 1 ){
+                    echo "ITEM";
+                }else{
+                    echo "-x-";
+                }
             }
             break;
 
